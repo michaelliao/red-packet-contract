@@ -93,14 +93,14 @@ contract RedPacket {
         return id;
     }
 
-    function isWithdrawed(uint256 id, address addr) public view returns (bool) {
+    function isOpened(uint256 id, address addr) public view returns (bool) {
         bytes32 withdrawedHash = keccak256(abi.encodePacked(id, addr));
         return withdrawedMap[withdrawedHash];
     }
 
-    function withdraw(uint256 id, uint256 proof) public returns (uint256) {
+    function open(uint256 id, uint256 proof) public returns (uint256) {
         RedPacketInfo storage p = redPackets[id];
-        require(p.token != address(0), "red packet not exist");
+        require(p.token != address(0), "red packet not exist.");
         address condition = p.condition;
         if (condition != address(0)) {
             require(
@@ -109,11 +109,11 @@ contract RedPacket {
             );
         }
 
-        require(p.totalLeft > 0, "red packet is empty");
+        require(p.totalLeft > 0, "red packet is empty.");
 
         // can only withdraw once for same red packet:
         bytes32 withdrawedHash = keccak256(abi.encodePacked(id, msg.sender));
-        require(!withdrawedMap[withdrawedHash], "already withdrawed.");
+        require(!withdrawedMap[withdrawedHash], "already opened.");
         withdrawedMap[withdrawedHash] = true;
 
         // FIXME: check zk-proof
