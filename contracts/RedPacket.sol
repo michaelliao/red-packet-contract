@@ -93,6 +93,11 @@ contract RedPacket {
         return id;
     }
 
+    function isWithdrawed(uint256 id, address addr) public view returns (bool) {
+        bytes32 withdrawedHash = keccak256(abi.encodePacked(id, addr));
+        return withdrawedMap[withdrawedHash];
+    }
+
     function withdraw(uint256 id, uint256 proof) public returns (uint256) {
         RedPacketInfo storage p = redPackets[id];
         require(p.token != address(0), "red packet not exist");
