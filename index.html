@@ -4,22 +4,735 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Crypto red packet with password to open, protected by zk-proof.">
 
     <title>Red Packet</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.32/dist/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/snarkjs@0.5.0/build/snarkjs.min.js"></script>
+
+    <style>
+        a {
+            text-decoration: none;
+        }
+    </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G71EH5JJVS"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-G71EH5JJVS');
+    </script>
+
+    <script>
+        window.ZERO_ADDR = '0x0000000000000000000000000000000000000000';
+        window.ETH_ADDR = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+        window.RED_PACKET_ADDR = '0xFe666af45182695Dbd9fa39eCDfbEF50a27A297d';
+        window.RED_PACKET_ABI = '[{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"redPacketId","type":"uint256"},{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"total","type":"uint32"},{"indexed":false,"internalType":"enum RedPacket.BonusType","name":"bonusType","type":"uint8"}],"name":"Create","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"redPacketId","type":"uint256"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"address","name":"token","type":"address"},{"indexed":false,"internalType":"uint256","name":"bonus","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"bonusLeft","type":"uint256"},{"indexed":false,"internalType":"uint32","name":"totalLeft","type":"uint32"}],"name":"Withdraw","type":"event"},{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint32","name":"total","type":"uint32"},{"internalType":"enum RedPacket.BonusType","name":"bonusType","type":"uint8"},{"internalType":"uint256","name":"passcodeHash","type":"uint256"},{"internalType":"address","name":"condition","type":"address"}],"name":"create","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getRedPacket","outputs":[{"components":[{"internalType":"uint256","name":"passcodeHash","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"uint256","name":"amountLeft","type":"uint256"},{"internalType":"address","name":"creator","type":"address"},{"internalType":"address","name":"token","type":"address"},{"internalType":"address","name":"condition","type":"address"},{"internalType":"uint32","name":"total","type":"uint32"},{"internalType":"uint32","name":"totalLeft","type":"uint32"},{"internalType":"enum RedPacket.BonusType","name":"bonusType","type":"uint8"}],"internalType":"struct RedPacket.RedPacketInfo","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"address","name":"addr","type":"address"}],"name":"isOpened","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256[]","name":"proof","type":"uint256[]"}],"name":"open","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"},{"internalType":"uint256[2]","name":"input","type":"uint256[2]"}],"name":"verifyProof","outputs":[{"internalType":"bool","name":"r","type":"bool"}],"stateMutability":"view","type":"function"}]';
+        window.CONDITION_ABI = '[{"inputs":[{"internalType":"address","name":"redpacketContract","type":"address"},{"internalType":"uint256","name":"redpacketId","type":"uint256"},{"internalType":"address","name":"operator","type":"address"}],"name":"check","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"}]';
+        window.ERC20_ABI = '[{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]';
+        window.CREATE_TOPIC = '0xf526b6d6ff0fac13f7e16aeea0f08bc8f0789c188dc429de0ea4b56bc06e82c6';
+
+        window.CHAINS = {
+            // chainId: ['name', 'https://scanurl', 'sortBy']
+            '1': ['Ethereum', 'https://etherscan.io', 10],
+            '56': ['BSC', 'https://bscscan.com', 20],
+            '137': ['Polygon', 'https://polygonscan.com', 30],
+            '128': ['Heco', 'https://hecoinfo.com', 90],
+            '5': ['Goerli Testnet', 'https://goerli.etherscan.io', 10010],
+            '97': ['BSC Testnet', 'https://testnet.bscscan.com', 10020],
+            '80001': ['Ploygon Testnet', 'https://mumbai.polygonscan.com', 10030]
+        };
+
+        $(function () {
+            let chains = [];
+            for (let chainId in window.CHAINS) {
+                chains.push(window.CHAINS[chainId]);
+            }
+            chains.sort((c1, c2) => c1[2] - c2[2]);
+            for (let i = 0; i < chains.length; i++) {
+                let chain = chains[i];
+                $('#chainList').append('<a target="_blank" href="' + chain[1] + '/address/' + window.RED_PACKET_ADDR + '" class="me-4">' + chain[0] + ' <i class="bi bi-box-arrow-up-right"></i></a>');
+            }
+        });
+
+        function keccak(str) {
+            let arr = new TextEncoder().encode(str);
+            return ethers.utils.keccak256(arr);
+        }
+
+        function toBN(s, decimals) {
+            try {
+                return ethers.utils.parseUnits(s.trim(), decimals);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function isValidBN(s, decimals) {
+            let bn = toBN(s, decimals);
+            return bn !== null && !bn.isZero() && !bn.isNegative();
+        }
+
+        function isValidAddress(s) {
+            try {
+                ethers.utils.getAddress(s);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function getWeb3Provider() {
+            if (!window.web3Provider) {
+                if (!window.ethereum) {
+                    console.error("there is no web3 provider.");
+                    return null;
+                }
+                window.web3Provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+            }
+            return window.web3Provider;
+        }
+
+        function showAlert(title, message) {
+            let m = $('#alertModal');
+            m.find('.x-title').text(title);
+            m.find('.x-message').text(message);
+            let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
+            myModal.show();
+        }
+
+        function showInfo(title, message) {
+            let m = $('#infoModal');
+            m.find('.x-title').text(title);
+            if (message.startsWith('<')) {
+                m.find('.x-message').html(message);
+            } else {
+                m.find('.x-message').text(message);
+            }
+            let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
+            myModal.show();
+        }
+
+        function showLoading(title, message) {
+            let m = $('#loadingModal');
+            let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
+            let obj = {
+                setTitle: (t) => {
+                    m.find('.x-title').text(t);
+                },
+                setMessage: (t) => {
+                    m.find('.x-message').text(t);
+                },
+                close: () => {
+                    setTimeout(function () {
+                        myModal.hide();
+                    }, 500);
+                }
+            }
+            obj.setTitle(title);
+            obj.setMessage(message);
+            myModal.show();
+            return obj;
+        }
+
+        function translateError(err) {
+            window.err = err;
+            if (typeof (err) === 'string') {
+                return err;
+            }
+            if (err.error && err.error.code && err.error.message) {
+                return `Error (${err.error.code}): ${err.error.message}`;
+            }
+            if (err.code && err.message) {
+                return `Error (${err.code}): ${err.message}`;
+            }
+            return err.message || err.toString();
+        }
+
+        function init() {
+            console.log('init vue...');
+            window.vm = new Vue({
+                el: '#vm',
+                data: {
+                    account: null,
+                    chainId: 0,
+                    nativeToken: 'ETH',
+                    popularTokens: [
+                        {
+                            name: 'WBTC',
+                            address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+                        },
+                        {
+                            name: 'USDT',
+                            address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+                        },
+                        {
+                            name: 'SHIB',
+                            address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE'
+                        }
+                    ],
+                    tokenType: 'ETH',
+                    tokenAddress: '',
+                    tokenAmount: '1.0',
+                    total: 7,
+                    bonusType: '0', // 0=Identical, 1=Random
+                    password: '',
+                    conditionAddress: ''
+                },
+                computed: {
+                    ready: function () {
+                        return this.account && this.chainId > 0;
+                    },
+                    networkName: function () {
+                        if (this.account) {
+                            let cs = window.CHAINS[this.chainId];
+                            if (cs) {
+                                return cs[0];
+                            }
+                            return 'Unsupported Chain (0x' + this.chainId.toString(16) + ')';
+                        }
+                        return 'Not connected';
+                    },
+                    wrongNetwork: function () {
+                        return this.account && !window.CHAINS[this.chainId];
+                    }
+                },
+                methods: {
+                    setPopularToken: function (name, addr) {
+                        this.tokenAddress = addr;
+                    },
+                    createRedPacket: async function () {
+                        // check:
+                        let
+                            chainId = this.chainId,
+                            tokenAddress,
+                            tokenAmount,
+                            decimals,
+                            total,
+                            bonusType,
+                            password,
+                            account,
+                            passcode,
+                            passcodeHash,
+                            conditionAddress = window.ZERO_ADDR,
+                            value,
+                            redPacketId = 0;
+                        if (!this.ready) {
+                            return showAlert('Error', 'Please connect to wallet first!');
+                        }
+                        if (this.wrongNetwork) {
+                            return showAlert('Error', 'The connected network is not supported!');
+                        }
+                        // important: account must be lowercase:
+                        account = this.account.toLowerCase();
+                        if (this.tokenType === 'ETH') {
+                            tokenAddress = window.ETH_ADDR;
+                            decimals = 18;
+                        } else {
+                            if (!isValidAddress(this.tokenAddress)) {
+                                return showAlert('Error', 'Token address is invalid!');
+                            }
+                            tokenAddress = this.tokenAddress;
+                            let
+                                loading1 = showLoading('Get ERC Token', 'Get ERC token information...'),
+                                erc1 = new ethers.Contract(tokenAddress, window.ERC20_ABI, window.getWeb3Provider().getSigner());
+                            try {
+                                decimals = await erc1.decimals();
+                                loading1.close();
+                                console.log('got erc ' + tokenAddress + ' decimals = ' + decimals + ' type = ' + typeof (decimals));
+                            }
+                            catch (err) {
+                                loading1.close();
+                                return showAlert('Error', 'Failed to get decimals of token: ' + translateError(err));
+                            }
+                        }
+                        // check tokenAmount:
+                        if (!isValidBN(this.tokenAmount, decimals)) {
+                            return showAlert('Error', 'Bonus amount is invalid!');
+                        }
+                        tokenAmount = toBN(this.tokenAmount, decimals);
+                        total = parseInt(this.total);
+                        if (isNaN(total) || total < 0 || total > 100000) {
+                            return showAlert('Error', 'Max perticipates is invalid!');
+                        }
+                        bonusType = parseInt(this.bonusType);
+                        // check password:
+                        password = this.password.trim();
+                        if (password === '') {
+                            return showAlert('Error', 'Password must be set!');
+                        }
+                        // check condition:
+                        if (this.conditionAddress.trim() !== '') {
+                            if (!isValidAddress(this.conditionAddress)) {
+                                return showAlert('Error', 'Validator address is invalid!');
+                            }
+                            conditionAddress = this.conditionAddress;
+                            let
+                                loading2 = showLoading('Check Validator', 'Check validator contract...'),
+                                cc = new ethers.Contract(conditionAddress, window.CONDITION_ABI, window.getWeb3Provider().getSigner());
+                            try {
+                                await cc.check(window.RED_PACKET_ADDR, 1, account);
+                                loading2.close();
+                            } catch (err) {
+                                loading2.close();
+                                return showAlert('Error', 'Failed to check validator contract: ' + translateError(err));
+                            }
+                        }
+
+                        // now generate password hash:
+                        passcode = keccak(account + password);
+                        passcodeHash = keccak(passcode);
+                        console.log('keccak(' + (account + password) + ') = ' + passcode);
+                        console.log('passcode hash = ' + passcodeHash);
+
+                        let
+                            loading = showLoading('Create', 'Check balance...'),
+                            redPacket = new ethers.Contract(window.RED_PACKET_ADDR, window.RED_PACKET_ABI, window.getWeb3Provider().getSigner());
+                        try {
+                            if (tokenAddress === window.ETH_ADDR) {
+                                let eth_balance = await window.getWeb3Provider().getBalance(account);
+                                if (eth_balance.lt(tokenAmount)) {
+                                    throw 'You don\'t have enough ' + this.nativeToken + '.';
+                                }
+                            } else {
+                                let
+                                    erc = new ethers.Contract(tokenAddress, window.ERC20_ABI, window.getWeb3Provider().getSigner()),
+                                    erc_symbol = await erc.symbol(),
+                                    erc_balance = await erc.balanceOf(account);
+                                if (erc_balance.lt(tokenAmount)) {
+                                    throw 'You don\'t have enough ' + erc_symbol + '.';
+                                }
+                                console.log('check allowance...');
+                                loading.setMessage('Check allowance...');
+                                let erc_allowance = await erc.allowance(account, window.RED_PACKET_ADDR);
+                                console.log('allowance = ' + erc_allowance);
+                                if (erc_allowance.lt(tokenAmount)) {
+                                    console.log('must increase allowance.');
+                                    loading.setMessage('Please approve the Red Packet contract to spend your ' + erc_symbol + ' in MetaMask...');
+                                    let tx_approve = await erc.approve(window.RED_PACKET_ADDR, ethers.utils.parseUnits('1000000000000000000', 18));
+                                    loading.setMessage('Please wait for blockchain confirmation...');
+                                    await tx_approve.wait(1);
+                                }
+                            }
+                            loading.setMessage('Please sign transaction in MetaMask...');
+                            value = tokenAddress === window.ETH_ADDR ? tokenAmount : 0;
+                            console.log('tokenAddress = ' + tokenAddress + '\n' +
+                                'tokenAmount = ' + tokenAmount + ', type = ' + typeof (tokenAmount) + '\n' +
+                                'total = ' + total + '\n' +
+                                'bonusType = ' + bonusType + '\n' +
+                                'passcodeHash = ' + passcodeHash + '\n' +
+                                'conditionAddress = ' + conditionAddress + '\n' +
+                                'value = ' + value
+                            );
+                            let tx = await redPacket.create(
+                                tokenAddress,
+                                tokenAmount,
+                                total,
+                                bonusType,
+                                passcodeHash,
+                                conditionAddress,
+                                {
+                                    value: value
+                                }
+                            );
+                            loading.setMessage('Please wait for blockchain confirmation...');
+                            await tx.wait(1);
+                            loading.setMessage('Get transaction logs...');
+                            // get red packet id from log:
+                            let receipt = await getWeb3Provider().getTransactionReceipt(tx.hash);
+                            let logs = receipt.logs;
+                            for (let i = 0; i < logs.length; i++) {
+                                let log = logs[i];
+                                if (log.topics && log.topics[0] === window.CREATE_TOPIC) {
+                                    redPacketId = parseInt(log.data.substring(0, 66), 16);
+                                    console.log('red packet id: ' + redPacketId);
+                                    break;
+                                }
+                            }
+                            loading.close();
+                            let url = location.href + 'rp.html?chain=' + chainId + '&id=' + redPacketId;
+                            showInfo('Success', '<p>Red packet created successfully!</p><p>Password: ' +
+                                password + '</p><p>You can share this red packet:</p><p><a target="_blank" href="' +
+                                url + '">' + url + ' <i class="bi bi-box-arrow-up-right"></i></a></p>');
+                        } catch (err) {
+                            loading.close();
+                            return showAlert('Error', translateError(err));
+                        }
+                    },
+                    abbrAddress: function (addr) {
+                        if (!addr) {
+                            return '';
+                        }
+                        let s = addr.toString();
+                        if (s.indexOf('0x') === 0 && s.length === 42) {
+                            let addr = ethers.utils.getAddress(s.substring(0));
+                            return addr.substring(0, 6) + '...' + addr.substring(38);
+                        }
+                        return s;
+                    },
+                    tokenUrl: function (addr) {
+                        let cs = window.CHAINS[this.chainId];
+                        if (cs) {
+                            return cs[1] + '/token/' + addr;
+                        } else {
+                            return '#1';
+                        }
+                    },
+                    gotoScanUrl: function () {
+                        let cs = window.CHAINS[this.chainId];
+                        if (cs) {
+                            window.open(cs[1] + '/address/' + this.account);
+                        } else {
+                            console.error('Invalid chain id: ', this.chainId);
+                        }
+                    },
+                    displayBN: function (bn, decimals) {
+                        let
+                            BN100 = ethers.utils.parseUnits('100', 0),
+                            B = ethers.utils.parseUnits('1000000000', decimals),
+                            M = ethers.utils.parseUnits('1000000', decimals),
+                            K = ethers.utils.parseUnits('1000', decimals);
+                        if (bn.gte(B)) {
+                            return ethers.utils.formatUnits(bn.mul(BN100).div(B), 2) + ' B';
+                        }
+                        if (bn.gte(M)) {
+                            return ethers.utils.formatUnits(bn.mul(BN100).div(M), 2) + ' M';
+                        }
+                        if (bn.gte(K)) {
+                            return ethers.utils.formatUnits(bn.mul(BN100).div(K), 2) + ' K';
+                        }
+                        // ##.###
+                        let
+                            s = ethers.utils.formatUnits(bn, decimals),
+                            n = s.indexOf('.'),
+                            pad;
+                        if (n === (-1)) {
+                            return s + '.000';
+                        }
+                        pad = 3 - (s.length - n - 1);
+                        if (pad > 0) {
+                            return s + '0'.repeat(3 - (s.length - n - 1));
+                        }
+                        return s.substring(0, n + 4);
+                    },
+                    formatBN: function (bn, decimals) {
+                        let
+                            s = ethers.utils.formatUnits(bn, decimals),
+                            n = s.indexOf('.');
+                        if (n == (-1)) {
+                            s = s + '.' + '0'.repeat(decimals);
+                        } else {
+                            s = s + '0'.repeat(decimals - (s.length - n - 1));
+                        }
+                        return s;
+                    },
+                    accountChanged: function (accounts) {
+                        console.log('wallet account changed:', accounts.length === 0 ? null : accounts[0]);
+                        if (accounts.length === 0) {
+                            this.disconnected();
+                        } else {
+                            this.account = accounts[0];
+                            document.cookie = '__account__=' + this.account + ';max-age=1296000';
+                        }
+                    },
+                    disconnected: async function () {
+                        console.warn('wallet disconnected.');
+                        this.account = null;
+                    },
+                    chainChanged: function (chainId) {
+                        console.log('wallet chainId changed: ' + chainId + ' = ' + parseInt(chainId, 16));
+                        this.chainId = parseInt(chainId, 16);
+                    },
+                    connectWallet: async function () {
+                        console.log('try connect wallet...');
+                        if (window.getWeb3Provider() === null) {
+                            console.error('there is no web3 provider.');
+                            return false;
+                        }
+                        try {
+                            this.accountChanged(await window.ethereum.request({
+                                method: 'eth_requestAccounts',
+                            }));
+                            this.chainChanged(await window.ethereum.request({
+                                method: 'eth_chainId'
+                            }));
+                            window.ethereum.on('disconnect', this.disconnected);
+                            window.ethereum.on('accountsChanged', this.accountChanged);
+                            window.ethereum.on('chainChanged', this.chainChanged);
+                        } catch (e) {
+                            console.error('could not get a wallet connection.', e);
+                            return false;
+                        }
+                        console.log('wallet connected.');
+                        return true;
+                    }
+                }
+            });
+        }
+
+        $(function () {
+            init();
+        });
+    </script>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Under Construction</h1>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="modal fade" role="dialog" aria-hidden="true" aria-labelledby="loadingLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-items-center d-flex">
+                    <h4 class="modal-title x-title" id="loadingLabel">&nbsp;</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="float-start">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="ms-5 ps-4 float-none">
+                        <p class="x-message">&nbsp;</p>
+                    </div>
+                </div>
+                <!-- <div class="modal-footer">
+                    <button class="btn btn-outline-primary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                </div> -->
+            </div>
+        </div>
     </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="modal fade" role="dialog" aria-hidden="true" aria-labelledby="alertLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-items-center d-flex">
+                    <h4 class="modal-title x-title" id="alertLabel">&nbsp;</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fe fe-x-circle"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="float-start">
+                        <i class="fs-2 text-danger fe fe-alert-triangle"></i>
+                    </div>
+                    <div class="ms-5 ps-4 float-none">
+                        <p class="x-message">&nbsp;</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-primary" data-bs-dismiss="modal" aria-label="Close">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal fade" role="dialog" aria-hidden="true" aria-labelledby="infoLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-items-center d-flex">
+                    <h4 class="modal-title x-title" id="infoLabel">&nbsp;</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"><i class="fe fe-x-circle"></i></span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="float-start">
+                        <i class="fs-2 fe fe-info"></i>
+                    </div>
+                    <div class="ms-5 ps-4 float-none">
+                        <p class="x-message">&nbsp;</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-primary" data-bs-dismiss="modal" aria-label="Close">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="vm" class="container">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom"
+            style="position:fixed; top:0; left:0; right:0; z-index: 99;">
+            <div class="container">
+                <a class="navbar-brand" href="#0"><i class="bi bi-envelope-paper"></i> Red Packet</a>
+                <ul id="wallet" class="mr-2 navbar-nav navbar-right-wrap" style="flex-direction: row !important;">
+                    <li class="nav-item">
+                        <span class="nav-link"><i class="bi bi-globe"></i>
+                            <span v-text="networkName"></span></span>
+                    </li>
+                    <li v-if="account===null" class="nav-item">
+                        <button v-on:click="connectWallet" type="button" class="btn btn-primary">Connect Wallet</button>
+                    </li>
+                    <li v-if="account!==null" class="nav-item">
+                        <a href="#0" class="nav-link" v-on:click="gotoScanUrl"><i class="bi bi-wallet"></i>
+                            <span v-text="abbrAddress(account)"></span> <i class="fe fe-external-link"></i></a>
+                    </li>
+                    <li v-if="wrongNetwork" class="ms-2 d-inline-block">
+                        <span class="nav-link">Unsupported chain (<span v-text="chainId"></span>)</span>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div style="padding-top: 80px;">
+            <div class="row">
+                <div class="col">
+                    <div class="x-border">
+                        <h5>Introduction</h5>
+                        <p>The Red Packet is an Ethereum contract that support distribute bonus with lucky.
+                            A lucky guy who want to get the bonus must know the password that is set by creator.
+                            It uses zk-proof to make all things safe. Supported chains:</p>
+                        <p id="chainList"></p>
+                        <p>Make sure you have tested on testnet before use the mainnet.
+                            (e.g. test with
+                            <a href="https://blockscan.com/address/0xBBB02DE94E1Dd1E99b43458027f31aBb2d75659B"
+                                target="_blank">tWBTC <i class="bi bi-box-arrow-up-right"></i></a>
+                            ,
+                            <a href="https://blockscan.com/address/0xEEE0C84193E02E67164b9b4402e47ef9CffA5b09"
+                                target="_blank">tWETH <i class="bi bi-box-arrow-up-right"></i></a>
+                            ,
+                            <a href="https://blockscan.com/address/0xDDD076E315e288a7146E8c8612a57Baae4Df21C7"
+                                target="_blank">tUSD <i class="bi bi-box-arrow-up-right"></i></a>
+                            . Use faucet() to get test token.)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- create red packet -->
+            <div class="row mt-4">
+                <div class="col">
+                    <div class="container" style="width:480px;">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Create a Red Packet</h5>
+                                <hr />
+                                <form onsubmit="return false">
+                                    <div class="mb-3">
+                                        <label class="form-label">Bonus:</label>
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="radio" name="tokenType"
+                                                    value="ETH" v-model="tokenType">
+                                                ETH
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input class="form-check-input" type="radio" name="tokenType"
+                                                    value="ERC" v-model="tokenType">
+                                                ERC20
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 ms-4">
+                                        <label for="bonus-token" class="form-label">Token Address:</label>
+                                        <div class="input-group">
+                                            <input v-bind:disabled="tokenType==='ETH'" v-model="tokenAddress"
+                                                id="bonus-token" type="text" maxlength="42" class="form-control"
+                                                placeholder="0x">
+                                            <button v-bind:disabled="tokenType==='ETH'"
+                                                class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown"><i class="bi bi-coin"></i></button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li><button class="dropdown-item" type="button">WBTC</button></li>
+                                                <li><button class="dropdown-item" type="button">BNB</button></li>
+                                                <li><button class="dropdown-item" type="button">USDT</button></li>
+                                                <li><button class="dropdown-item" type="button">USDC</button></li>
+                                                <li><button class="dropdown-item" type="button">BUSD</button></li>
+                                                <li><button class="dropdown-item" type="button">DAI</button></li>
+                                            </ul>
+                                        </div>
+                                        <div class="form-text">The token you want to sent.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="bonus-amount" class="form-label">Bonus Amount:</label>
+                                        <input v-model="tokenAmount" id="bonus-amount" type="text" maxlength="42"
+                                            class="form-control">
+                                        <div class="form-text">The amount of bonus you want to sent.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="bonus-amount" class="form-label">Max Participates:</label>
+                                        <input v-model:number="total" id="bonus-amount" type="number" min="1"
+                                            max="100000" class="form-control">
+                                        <div class="form-text">The max participates who can get the bonus.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Bonus Mode:</label>
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input v-model="bonusType" class="form-check-input" type="radio"
+                                                    name="bonusType" id="bonus-type-identical" value="0">
+                                                Identical for Each
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <label class="form-check-label">
+                                                <input v-model="bonusType" class="form-check-input" type="radio"
+                                                    name="bonusType" id="bonus-type-random" value="1">
+                                                Random for Each
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="bonus-password" class="form-label">Password:</label>
+                                        <input v-model="password" id="bonus-password" type="text" maxlength="100"
+                                            class="form-control" placeholder="e.g. Bitcoin is awesome!">
+                                        <div class="form-text">The case-sensitive password to open the red packet.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="condition-address" class="form-label">Validator Address:</label>
+                                        <input v-model="conditionAddress" id="condition-address" type="text"
+                                            maxlength="42" class="form-control" placeholder="0x">
+                                        <div class="form-text">You can specify a validator contract, or leave it blank.
+                                        </div>
+                                    </div>
+                                    <div class="mb-2 text-center">
+                                        <button v-on:click="createRedPacket" type="button"
+                                            class="btn btn-primary ps-5 pe-5">Send</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="p-5 mt-5 bg-light border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="mb-4"><i class="bi bi-envelope-paper"></i> Red Packet, copyleft 2023</div>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2">Designed and built by
+                            <a target="_blank" href="https://github.com/michaelliao">Michael Liao
+                                <i class="bi bi-box-arrow-up-right"></i></a>.
+                        </li>
+                        <li class="mb-2">Check the source code on
+                            <a target="_blank" href="https://github.com/michaelliao/red-packet-contract">Github
+                                <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                        <li class="mb-2">Code licensed
+                            <a target="_blank"
+                                href="https://github.com/michaelliao/red-packet-contract/blob/master/LICENSE">GPLv3
+                                <i class="bi bi-box-arrow-up-right"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 
 </html>
