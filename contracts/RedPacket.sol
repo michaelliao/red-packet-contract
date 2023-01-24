@@ -3,8 +3,13 @@ pragma solidity =0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./Condition.sol";
+import "./Verifier.sol";
 
-contract RedPacket {
+/**
+ * RedPacket with zk-proof.
+ * https://redpacket.eth.itranswarp.com
+ */
+contract RedPacket is Verifier {
     using SafeERC20 for IERC20;
 
     enum BonusType {
@@ -54,7 +59,7 @@ contract RedPacket {
         returns (RedPacketInfo memory)
     {
         RedPacketInfo memory p = redPackets[id];
-        require(p.token != address(0), "not exist");
+        require(p.token != address(0), "Not exist");
         return p;
     }
 
@@ -66,13 +71,13 @@ contract RedPacket {
         uint256 passcodeHash,
         address condition
     ) public payable returns (uint256) {
-        require(token != address(0), "invalid token address");
-        require(total > 0, "invalid total");
-        require(amount >= total, "invalid amount");
+        require(token != address(0), "Invalid token address");
+        require(total > 0, "Invalid total");
+        require(amount >= total, "Invalid amount");
 
         // transfer token into contract:
         if (token == ETH) {
-            require(msg.value == amount, "invalid value");
+            require(msg.value == amount, "Invalid value");
         } else {
             (IERC20(token)).safeTransferFrom(msg.sender, address(this), amount);
         }
@@ -98,25 +103,38 @@ contract RedPacket {
         return withdrawedMap[withdrawedHash];
     }
 
-    function open(uint256 id, uint256 proof) public returns (uint256) {
+    function open(
+        uint256 id,
+        // zk proof:
+        uint256[] memory proof
+    ) public returns (uint256) {
         RedPacketInfo storage p = redPackets[id];
-        require(p.token != address(0), "red packet not exist.");
+        require(p.token != address(0), "Not exist");
         address condition = p.condition;
         if (condition != address(0)) {
             require(
                 ICondition(condition).check(address(this), id, msg.sender),
-                "address rejected"
+                "Address rejected"
             );
         }
 
-        require(p.totalLeft > 0, "red packet is empty.");
+        require(p.totalLeft > 0, "Red packet is empty");
 
         // can only withdraw once for same red packet:
         bytes32 withdrawedHash = keccak256(abi.encodePacked(id, msg.sender));
-        require(!withdrawedMap[withdrawedHash], "already opened.");
+        require(!withdrawedMap[withdrawedHash], "Already opened");
         withdrawedMap[withdrawedHash] = true;
 
-        // FIXME: check zk-proof
+        // verify zk-proof
+        require(proof.length == 8, "Invalid proof");
+        uint256[2] memory a = [proof[0], proof[1]];
+        uint256[2][2] memory b = [[proof[2], proof[3]], [proof[4], proof[5]]];
+        uint256[2] memory c = [proof[6], proof[7]];
+        uint256[2] memory input = [
+            p.passcodeHash,
+            uint256(uint160(msg.sender))
+        ];
+        require(verifyProof(a, b, c, input), "Failed verify proof");
 
         uint256 bonus = getBonus(
             p.amount,
@@ -126,7 +144,8 @@ contract RedPacket {
             p.bonusType
         );
 
-        p.amountLeft = p.amountLeft - bonus;
+        uint256 bonusLeft = p.amountLeft - bonus;
+        p.amountLeft = bonusLeft;
         p.totalLeft = p.totalLeft - 1;
 
         if (p.token == ETH) {
@@ -138,14 +157,7 @@ contract RedPacket {
             (IERC20(p.token)).safeTransfer(msg.sender, bonus);
         }
 
-        emit Withdraw(
-            id,
-            msg.sender,
-            p.token,
-            bonus,
-            p.amountLeft,
-            p.totalLeft
-        );
+        emit Withdraw(id, msg.sender, p.token, bonus, bonusLeft, p.totalLeft);
         return bonus;
     }
 
@@ -177,6 +189,6 @@ contract RedPacket {
             }
             return rnd;
         }
-        revert("invalid bonus type");
+        revert("Invalid bonus type");
     }
 }
