@@ -10,7 +10,7 @@ template Passcode() {
     component hash = MiMC7(3);
 
     hash.x_in <== (addr + secret);
-    hash.k <== 123456789;
+    hash.k <== 0;
     out <== hash.out;
 }
 
