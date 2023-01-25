@@ -305,9 +305,8 @@
                         }
 
                         // now generate password hash:
-                        passcode = keccak(account + password);
-
-                        let { proof, publicSignals } = await prove(ethers.BigNumber.from('0'), ethers.BigNumber.from(passcode));
+                        passcode = ethers.BigNumber.from(keccak(account + password));
+                        let { proof, publicSignals } = await prove(ethers.BigNumber.from('0'), passcode);
                         console.log(publicSignals);
                         passcodeHash = ethers.BigNumber.from(publicSignals[0]);
                         console.log('keccak(' + (account + password) + ') = ' + passcode);

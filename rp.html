@@ -419,6 +419,10 @@
             '80001': ['Ploygon Testnet', 'https://mumbai.polygonscan.com', 10030]
         };
 
+        async function prove(addrBN, secretBN) {
+            return await snarkjs.groth16.fullProve({ addr: addrBN.toString(), secret: secretBN.toString() }, "passcode_js/passcode.wasm", "passcode_js/passcode_0001.zkey");
+        }
+
         function keccak(str) {
             let arr = new TextEncoder().encode(str);
             return ethers.utils.keccak256(arr);
@@ -474,6 +478,21 @@
                 m.find('.x-message').text(message);
             }
             let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
+            myModal.show();
+        }
+
+        function showInput(onOkClicked) {
+            let
+                m = $('#inputModal'),
+                ok = m.find('button.btn-primary');
+            let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
+            ok.click(function () {
+                myModal.hide();
+                ok.off('click')
+                setTimeout(function () {
+                    onOkClicked && onOkClicked($('#inputPassword').val());
+                }, 500);
+            });
             myModal.show();
         }
 
@@ -617,137 +636,56 @@
                             this.loading = false;
                         }
                     },
-                    openRedPacket: async function () {
-                        // check:
-                        let
-                            chainId = this.chainId,
-                            tokenAddress,
-                            tokenAmount,
-                            decimals,
-                            total,
-                            bonusType,
-                            password,
-                            account,
-                            passcode,
-                            passcodeHash,
-                            conditionAddress = window.ZERO_ADDR,
-                            value,
-                            redPacketId = 0;
+                    openRedPacket: function () {
+                        let that = this;
+                        showInput(function (password) {
+                            if (password.trim() !== '') {
+                                that.tryOpenRedPacket(password.trim())
+                                    .then(console.log('tryOpenRedPacket: ok'))
+                                    .catch((e) => console.error(e));
+                            }
+                        });
+                    },
+                    tryOpenRedPacket: async function (password) {
                         if (!this.ready) {
                             return showAlert('Error', 'Please connect MetaMask to ' + this.correctNetworkName + ' first!');
                         }
-                        // important: account must be lowercase:
-                        account = this.account.toLowerCase();
-                        if (this.tokenType === 'ETH') {
-                            tokenAddress = window.ETH_ADDR;
-                            decimals = 18;
-                        } else {
-                            if (!isValidAddress(this.tokenAddress)) {
-                                return showAlert('Error', 'Token address is invalid!');
-                            }
-                            tokenAddress = this.tokenAddress;
-                            let
-                                loading1 = showLoading('Get ERC Token', 'Get ERC token information...'),
-                                erc1 = new ethers.Contract(tokenAddress, window.ERC20_ABI, window.getWeb3Provider().getSigner());
-                            try {
-                                decimals = await erc1.decimals();
-                                loading1.close();
-                                console.log('got erc ' + tokenAddress + ' decimals = ' + decimals + ' type = ' + typeof (decimals));
-                            }
-                            catch (err) {
-                                loading1.close();
-                                return showAlert('Error', 'Failed to get decimals of token: ' + translateError(err));
-                            }
-                        }
-                        // check tokenAmount:
-                        if (!isValidBN(this.tokenAmount, decimals)) {
-                            return showAlert('Error', 'Bonus amount is invalid!');
-                        }
-                        tokenAmount = toBN(this.tokenAmount, decimals);
-                        total = parseInt(this.total);
-                        if (isNaN(total) || total < 0 || total > 100000) {
-                            return showAlert('Error', 'Max perticipates is invalid!');
-                        }
-                        bonusType = parseInt(this.bonusType);
                         // check password:
-                        password = this.password.trim();
-                        if (password === '') {
-                            return showAlert('Error', 'Password must be set!');
-                        }
-                        // check condition:
-                        if (this.conditionAddress.trim() !== '') {
-                            if (!isValidAddress(this.conditionAddress)) {
-                                return showAlert('Error', 'Validator address is invalid!');
-                            }
-                            conditionAddress = this.conditionAddress;
-                            let
-                                loading2 = showLoading('Check Validator', 'Check validator contract...'),
-                                cc = new ethers.Contract(conditionAddress, window.CONDITION_ABI, window.getWeb3Provider().getSigner());
-                            try {
-                                await cc.check(window.RED_PACKET_ADDR, 1, account);
-                                loading2.close();
-                            } catch (err) {
-                                loading2.close();
-                                return showAlert('Error', 'Failed to check validator contract: ' + translateError(err));
-                            }
-                        }
-
-                        // now generate password hash:
-                        passcode = keccak(account + password);
-                        passcodeHash = keccak(passcode);
-                        console.log('keccak(' + (account + password) + ') = ' + passcode);
-                        console.log('passcode hash = ' + passcodeHash);
-
                         let
-                            loading = showLoading('Create', 'Check balance...'),
-                            redPacket = new ethers.Contract(window.RED_PACKET_ADDR, window.RED_PACKET_ABI, window.getWeb3Provider().getSigner());
+                            payload = this.redPacket.creator.toLowerCase() + password,
+                            passcode = ethers.BigNumber.from(keccak(payload)),
+                            account = this.account.toLowerCase(),
+                            accountBN = ethers.BigNumber.from(account),
+                            secretBN = passcode.sub(accountBN);
+                        console.log('passcode hash stored in contract:', this.redPacket.passcodeHash);
+                        console.log('passcode from user input = ' + passcode);
+                        console.log('secret = ' + secretBN);
+                        let { proof, publicSignals } = await prove(accountBN, secretBN);
+                        console.log('proof:\n' + JSON.stringify(proof, null, 2));
+                        let passcodeHashBN = ethers.BigNumber.from(publicSignals[0]);
+                        if (!passcodeHashBN.eq(this.redPacket.passcodeHash)) {
+                            return showAlert('Error', 'Invalid password.');
+                        }
+                        // open:
+                        let
+                            bonus = null,
+                            proofs = [proof.pi_a[0], proof.pi_a[1], proof.pi_b[0][0], proof.pi_b[0][1], proof.pi_b[1][0], proof.pi_b[1][1], proof.pi_c[0], proof.pi_c[1]],
+                            rpContract = new ethers.Contract(this.redPacket.redPacketAddress, this.redPacket.redPacketABI, getWeb3Provider().getSigner()),
+                            loading = showLoading('Open', 'Plean sign transaction in MetaMask...');
+                        for (let i = 0; i < proofs.length; i++) {
+                            // string -> BN:
+                            proofs[i] = ethers.BigNumber.from(proofs[i]);
+                        }
+                        console.log('call open: ' + this.redPacket.id + '[' + proofs.join(',') + ']');
                         try {
-                            if (tokenAddress === window.ETH_ADDR) {
-                                let eth_balance = await window.getWeb3Provider().getBalance(account);
-                                if (eth_balance.lt(tokenAmount)) {
-                                    throw 'You don\'t have enough ' + this.nativeToken + '.';
-                                }
-                            } else {
-                                let
-                                    erc = new ethers.Contract(tokenAddress, window.ERC20_ABI, window.getWeb3Provider().getSigner()),
-                                    erc_symbol = await erc.symbol(),
-                                    erc_balance = await erc.balanceOf(account);
-                                if (erc_balance.lt(tokenAmount)) {
-                                    throw 'You don\'t have enough ' + erc_symbol + '.';
-                                }
-                                console.log('check allowance...');
-                                loading.setMessage('Check allowance...');
-                                let erc_allowance = await erc.allowance(account, window.RED_PACKET_ADDR);
-                                console.log('allowance = ' + erc_allowance);
-                                if (erc_allowance.lt(tokenAmount)) {
-                                    console.log('must increase allowance.');
-                                    loading.setMessage('Please approve the Red Packet contract to spend your ' + erc_symbol + ' in MetaMask...');
-                                    let tx_approve = await erc.approve(window.RED_PACKET_ADDR, ethers.utils.parseUnits('1000000000000000000', 18));
-                                    loading.setMessage('Please wait for blockchain confirmation...');
-                                    await tx_approve.wait(1);
-                                }
-                            }
-                            loading.setMessage('Please sign transaction in MetaMask...');
-                            value = tokenAddress === window.ETH_ADDR ? tokenAmount : 0;
-                            console.log('tokenAddress = ' + tokenAddress + '\n' +
-                                'tokenAmount = ' + tokenAmount + ', type = ' + typeof (tokenAmount) + '\n' +
-                                'total = ' + total + '\n' +
-                                'bonusType = ' + bonusType + '\n' +
-                                'passcodeHash = ' + passcodeHash + '\n' +
-                                'conditionAddress = ' + conditionAddress + '\n' +
-                                'value = ' + value
+                            let r = await rpContract.verifyProof(
+                                [proofs[0], proofs[1]],
+                                [[proofs[2], proofs[3]], [proofs[4], proofs[5]]],
+                                [proofs[6], proofs[7]],
+                                [this.redPacket.passcodeHash, this.redPacket.id]
                             );
-                            let tx = await redPacket.create(
-                                tokenAddress,
-                                tokenAmount,
-                                total,
-                                bonusType,
-                                passcodeHash,
-                                conditionAddress,
-                                {
-                                    value: value
-                                }
-                            );
+                            throw 'r = ' + r;
+                            let tx = await rpContract.open(this.redPacket.id, proofs);
                             loading.setMessage('Please wait for blockchain confirmation...');
                             await tx.wait(1);
                             loading.setMessage('Get transaction logs...');
@@ -756,17 +694,14 @@
                             let logs = receipt.logs;
                             for (let i = 0; i < logs.length; i++) {
                                 let log = logs[i];
-                                if (log.topics && log.topics[0] === window.CREATE_TOPIC) {
-                                    redPacketId = parseInt(log.data.substring(0, 66), 16);
-                                    console.log('red packet id: ' + redPacketId);
+                                if (log.topics && log.topics[0] === window.WITHDRAW_TOPIC) {
+                                    bonus = ethers.BigNumber.from('0x' + log.data.substring(66, 66 + 64), 16);
+                                    console.log('bonus: ' + bonus);
                                     break;
                                 }
                             }
                             loading.close();
-                            let url = location.href + 'rp.html?chain=' + chainId + '&id=' + redPacketId;
-                            showInfo('Success', '<p>Red packet created successfully!</p><p>Password: ' +
-                                password + '</p><p>You can share this red packet:</p><p><a target="_blank" href="' +
-                                url + '">' + url + ' <i class="bi bi-box-arrow-up-right"></i></a></p>');
+                            showInfo('Success', 'You have opened the red packet and get ' + ethers.utils.formatUnits(bonus, this.token.decimals) + ' ' + this.token.symbol + '!');
                         } catch (err) {
                             loading.close();
                             return showAlert('Error', translateError(err));
@@ -798,46 +733,6 @@
                         } else {
                             console.error('Invalid chain id: ', this.chainId);
                         }
-                    },
-                    displayBN: function (bn, decimals) {
-                        let
-                            BN100 = ethers.utils.parseUnits('100', 0),
-                            B = ethers.utils.parseUnits('1000000000', decimals),
-                            M = ethers.utils.parseUnits('1000000', decimals),
-                            K = ethers.utils.parseUnits('1000', decimals);
-                        if (bn.gte(B)) {
-                            return ethers.utils.formatUnits(bn.mul(BN100).div(B), 2) + ' B';
-                        }
-                        if (bn.gte(M)) {
-                            return ethers.utils.formatUnits(bn.mul(BN100).div(M), 2) + ' M';
-                        }
-                        if (bn.gte(K)) {
-                            return ethers.utils.formatUnits(bn.mul(BN100).div(K), 2) + ' K';
-                        }
-                        // ##.###
-                        let
-                            s = ethers.utils.formatUnits(bn, decimals),
-                            n = s.indexOf('.'),
-                            pad;
-                        if (n === (-1)) {
-                            return s + '.000';
-                        }
-                        pad = 3 - (s.length - n - 1);
-                        if (pad > 0) {
-                            return s + '0'.repeat(3 - (s.length - n - 1));
-                        }
-                        return s.substring(0, n + 4);
-                    },
-                    formatBN: function (bn, decimals) {
-                        let
-                            s = ethers.utils.formatUnits(bn, decimals),
-                            n = s.indexOf('.');
-                        if (n == (-1)) {
-                            s = s + '.' + '0'.repeat(decimals);
-                        } else {
-                            s = s + '0'.repeat(decimals - (s.length - n - 1));
-                        }
-                        return s;
                     },
                     accountChanged: function (accounts) {
                         console.log('wallet account changed:', accounts.length === 0 ? null : accounts[0]);
@@ -894,6 +789,31 @@
 </head>
 
 <body>
+    <!-- Input Modal -->
+    <div id="inputModal" class="modal fade" role="dialog" aria-hidden="true" aria-labelledby="inputLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header align-items-center d-flex">
+                    <h4 class="modal-title" id="inputLabel">Password</h4>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="return false">
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Password for this red packet:</label>
+                            <input id="inputPassword" type="text" maxlength="100" class="form-control">
+                            <div class="form-text">Input the password of the red packet set by creator.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">OK</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        aria-label="Close">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Modal -->
     <div id="loadingModal" class="modal fade" role="dialog" aria-hidden="true" aria-labelledby="loadingLabel">
         <div class="modal-dialog modal-lg" role="document">
@@ -1049,7 +969,7 @@
                                 <div class="triangle triangle-1-cover"></div>
                                 <div class="triangle triangle-2-cover"></div>
                                 <div class="rectangle-bottom"></div>
-                                <div class="circle can-open">
+                                <div v-on:click="openRedPacket" class="circle can-open">
                                     <img src="money.svg">
                                 </div>
                             </div>
