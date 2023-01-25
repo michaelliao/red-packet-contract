@@ -75,6 +75,10 @@
             return ethers.utils.keccak256(arr);
         }
 
+        async function prove(addrBN, secretBN) {
+            return await snarkjs.groth16.fullProve({ addr: addrBN.toString(), secret: secretBN.toString() }, "passcode_js/passcode.wasm", "passcode_js/passcode_0001.zkey");
+        }
+
         function toBN(s, decimals) {
             try {
                 return ethers.utils.parseUnits(s.trim(), decimals);
@@ -302,9 +306,12 @@
 
                         // now generate password hash:
                         passcode = keccak(account + password);
-                        passcodeHash = keccak(passcode);
+
+                        let { proof, publicSignals } = await prove(ethers.BigNumber.from('0'), ethers.BigNumber.from(passcode));
+                        console.log(publicSignals);
+                        passcodeHash = ethers.BigNumber.from(publicSignals[0]);
                         console.log('keccak(' + (account + password) + ') = ' + passcode);
-                        console.log('passcode hash = ' + passcodeHash);
+                        console.log('passcode hash = ', passcodeHash);
 
                         let
                             loading = showLoading('Create', 'Check balance...'),
