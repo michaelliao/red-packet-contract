@@ -48,14 +48,14 @@
         window.CREATE_TOPIC = '0xf526b6d6ff0fac13f7e16aeea0f08bc8f0789c188dc429de0ea4b56bc06e82c6';
 
         window.CHAINS = {
-            // chainId: ['name', 'https://scanurl', 'sortBy']
-            '1': ['Ethereum', 'https://etherscan.io', 10],
-            '56': ['BSC', 'https://bscscan.com', 20],
-            '137': ['Polygon', 'https://polygonscan.com', 30],
-            '128': ['Heco', 'https://hecoinfo.com', 90],
-            '5': ['Goerli Testnet', 'https://goerli.etherscan.io', 10010],
-            '97': ['BSC Testnet', 'https://testnet.bscscan.com', 10020],
-            '80001': ['Ploygon Testnet', 'https://mumbai.polygonscan.com', 10030]
+            // chainId: ['name', 'https://scanurl', 'sortBy', 'native token']
+            '1': ['Ethereum', 'https://etherscan.io', 10, 'ETH'],
+            '56': ['BSC', 'https://bscscan.com', 20, 'BNB'],
+            '137': ['Polygon', 'https://polygonscan.com', 30, 'MATIC'],
+            '128': ['Heco', 'https://hecoinfo.com', 90, 'HT'],
+            '5': ['Goerli Testnet', 'https://goerli.etherscan.io', 10010, 'ETH'],
+            '97': ['BSC Testnet', 'https://testnet.bscscan.com', 10020, 'BNB'],
+            '80001': ['Ploygon Testnet', 'https://mumbai.polygonscan.com', 10030, 'MATIC']
         };
 
         $(function () {
@@ -171,7 +171,6 @@
                 data: {
                     account: null,
                     chainId: 0,
-                    nativeToken: 'ETH',
                     popularTokens: [
                         {
                             name: 'WBTC',
@@ -195,6 +194,13 @@
                     conditionAddress: ''
                 },
                 computed: {
+                    nativeToken: function () {
+                        let cs = window.CHAINS[this.chainId];
+                        if (cs) {
+                            return cs[3];
+                        }
+                        return 'ETH';
+                    },
                     ready: function () {
                         return this.account && this.chainId > 0;
                     },
@@ -630,7 +636,7 @@
                                             <label class="form-check-label">
                                                 <input class="form-check-input" type="radio" name="tokenType"
                                                     value="ETH" v-model="tokenType">
-                                                ETH
+                                                <span v-text="nativeToken"></span>
                                             </label>
                                         </div>
                                         <div class="form-check">
