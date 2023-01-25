@@ -262,7 +262,7 @@
             }
 
             get redPacketAddress() {
-                return '0xfe666af45182695dbd9fa39ecdfbef50a27a297d';
+                return '0xFe6667986f58F2F7ed1e7C17Cee3951d8ABb717f';
             }
 
             get redPacketABI() {
@@ -274,7 +274,7 @@
             }
 
             get withdrawTopic() {
-                return '0x';
+                return '0x98ae10cde2519298a29f9d069abdf1971fa4cceb70f49a01994333fe70c7cf10';
             }
 
             get conditionABI() {
@@ -423,6 +423,39 @@
             return await snarkjs.groth16.fullProve({ addr: addrBN.toString(), secret: secretBN.toString() }, "passcode_js/passcode.wasm", "passcode_js/passcode_0001.zkey");
         }
 
+        async function test2() {
+            console.log(redPacket.redPacketAddress);
+            let c = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
+            let r = await c.verifyProof(["0x0b8c60649960cf2cc4f8a994dbd8f6f1d0d00b55540d37abb6bec333f27b24c3", "0x06026a38f848927ce73732680f53186d6bef92a827046ff22591ee0cfb8d5d2b"], [["0x1135aff3f21aed8698ee9dd3c171713fa6251daaf6e2e3ef8d1a51f59ecb9f36", "0x0d02ce49956fd027daa750136e830207cb83873a988c77aa507594580bd0220c"], ["0x2335507bfe41f6f993234e51e7358375da6c00569284b4bbf08860686b2960a3", "0x2ddd72019b6dc1eba0d9485676967a3a1fef9ff8b2fb3ece23b6b5fdd61afb64"]], ["0x179503d4fafb33a838fd9934e4a7155ea679fcc6a1c3292e708933118b9b90c5", "0x1d50dbb929fad057bc7ab741f12397689f7506fba33a21db087a5b5985a127b6"], ["0x02ef7bb233877d0f7da69147ce653c378ff5af8bc7afc44de20ea49b7a249b47", "0x000000000000000000000000000000000000000000000042ed123aef1abb7ef2"]);
+            console.log(r);
+        }
+
+        async function test3(a, b, c, i) {
+            let rp = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
+            let r = await rp.verifyProof(a, b, c, i);
+            console.log(r);
+        }
+
+        async function test() {
+            let accountBN = ethers.BigNumber.from('0x98fd82fbcb774cefa23e6e3fdc24e098bd665da6');
+            let secretBN = ethers.BigNumber.from('0x29bf85b7cb865170aed033cd9bbe884cadde50c55b68476a0ab747e7d07fd420');
+            let { proof, publicSignals } = await prove(accountBN, secretBN);
+            console.log('proof:\n' + JSON.stringify(proof, null, 2) + '\n' + JSON.stringify(publicSignals, null, 2));
+            let proofs = [proof.pi_a[0], proof.pi_a[1], proof.pi_b[0][0], proof.pi_b[0][1], proof.pi_b[1][0], proof.pi_b[1][1], proof.pi_c[0], proof.pi_c[1], publicSignals[0], publicSignals[1]];
+            for (let i = 0; i < proofs.length; i++) {
+                proofs[i] = ethers.BigNumber.from(proofs[i]).toHexString();
+                console.log('proof ' + i + ' = ', proofs[i]);
+            }
+            console.log('proof = ' + proofs);
+            let c = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
+            let r = await c.verifyProof([proofs[0], proofs[1]],
+                [[proofs[2], proofs[3]], [proofs[4], proofs[5]]],
+                [proofs[6], proofs[7]],
+                [proofs[8], proofs[9]]
+            );
+            console.log(r);
+        }
+
         function keccak(str) {
             let arr = new TextEncoder().encode(str);
             return ethers.utils.keccak256(arr);
@@ -485,6 +518,7 @@
             let
                 m = $('#inputModal'),
                 ok = m.find('button.btn-primary');
+            $('#inputPassword').val('');
             let myModal = new bootstrap.Modal(m.get(0), { backdrop: 'static', keyboard: false });
             ok.click(function () {
                 myModal.hide();
@@ -657,11 +691,11 @@
                             account = this.account.toLowerCase(),
                             accountBN = ethers.BigNumber.from(account),
                             secretBN = passcode.sub(accountBN);
-                        console.log('passcode hash stored in contract:', this.redPacket.passcodeHash);
-                        console.log('passcode from user input = ' + passcode);
-                        console.log('secret = ' + secretBN);
+                        console.log('passcode hash stored in contract:', this.redPacket.passcodeHash.toHexString());
+                        console.log('passcode from user input = ' + passcode.toHexString());
+                        console.log('secret = ' + secretBN.toHexString());
                         let { proof, publicSignals } = await prove(accountBN, secretBN);
-                        console.log('proof:\n' + JSON.stringify(proof, null, 2));
+                        console.log('proof:\n' + JSON.stringify(proof, null, 2) + '\n' + JSON.stringify(publicSignals, null, 2));
                         let passcodeHashBN = ethers.BigNumber.from(publicSignals[0]);
                         if (!passcodeHashBN.eq(this.redPacket.passcodeHash)) {
                             return showAlert('Error', 'Invalid password.');
@@ -669,22 +703,37 @@
                         // open:
                         let
                             bonus = null,
-                            proofs = [proof.pi_a[0], proof.pi_a[1], proof.pi_b[0][0], proof.pi_b[0][1], proof.pi_b[1][0], proof.pi_b[1][1], proof.pi_c[0], proof.pi_c[1]],
+                            proofs = [proof.pi_a[0], proof.pi_a[1], proof.pi_b[0][1], proof.pi_b[0][0], proof.pi_b[1][1], proof.pi_b[1][0], proof.pi_c[0], proof.pi_c[1]],
                             rpContract = new ethers.Contract(this.redPacket.redPacketAddress, this.redPacket.redPacketABI, getWeb3Provider().getSigner()),
-                            loading = showLoading('Open', 'Plean sign transaction in MetaMask...');
+                            loading = showLoading('Open', 'Check red packet status...');
                         for (let i = 0; i < proofs.length; i++) {
                             // string -> BN:
-                            proofs[i] = ethers.BigNumber.from(proofs[i]);
+                            proofs[i] = ethers.BigNumber.from(proofs[i]).toHexString();
                         }
-                        console.log('call open: ' + this.redPacket.id + '[' + proofs.join(',') + ']');
                         try {
+                            // is opened?
+                            let opened = await rpContract.isOpened(this.redPacket.id, account);
+                            if (opened) {
+                                throw 'You have already opened the red packet.';
+                            }
+                            loading.setMessage('Verify zk-proof...');
+                            console.log('call verifyProof:');
+                            for (let i = 0; i < proofs.length; i++) {
+                                console.log(proofs[i]);
+                            }
+                            console.log(this.redPacket.passcodeHash.toHexString());
+                            console.log(accountBN.toHexString());
                             let r = await rpContract.verifyProof(
                                 [proofs[0], proofs[1]],
                                 [[proofs[2], proofs[3]], [proofs[4], proofs[5]]],
                                 [proofs[6], proofs[7]],
-                                [this.redPacket.passcodeHash, this.redPacket.id]
+                                [passcodeHashBN.toHexString(), accountBN.toHexString()]
                             );
-                            throw 'r = ' + r;
+                            if (!r) {
+                                throw 'Generate proof failed.';
+                            }
+                            loading.setMessage('Please sign transaction in MetaMask...');
+                            console.log('call open: ' + this.redPacket.id + '[' + proofs.join(',') + ']');
                             let tx = await rpContract.open(this.redPacket.id, proofs);
                             loading.setMessage('Please wait for blockchain confirmation...');
                             await tx.wait(1);
@@ -694,7 +743,7 @@
                             let logs = receipt.logs;
                             for (let i = 0; i < logs.length; i++) {
                                 let log = logs[i];
-                                if (log.topics && log.topics[0] === window.WITHDRAW_TOPIC) {
+                                if (log.topics && log.topics[0] === this.redPacket.withdrawTopic) {
                                     bonus = ethers.BigNumber.from('0x' + log.data.substring(66, 66 + 64), 16);
                                     console.log('bonus: ' + bonus);
                                     break;
