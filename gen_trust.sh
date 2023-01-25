@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
 echo 'generate powers of tau...'
-rm -rf ptau
-mkdir ptau
-cd ptau
+
+cd passcode_js
 
 echo 'start a new ptau...'
 snarkjs powersoftau new bn128 12 pot12_0000.ptau -v
@@ -22,16 +21,15 @@ echo 'contribute to the ceremony...'
 snarkjs powersoftau contribute pot12_0000.ptau pot12_0001.ptau --name="First contribution" -v -e="$rnd1"
 
 echo 'start phase 2...'
-snarkjs powersoftau prepare phase2 pot12_0001.ptau ../passcode_js/pot12_final.ptau -v
+snarkjs powersoftau prepare phase2 pot12_0001.ptau pot12_final.ptau -v
 
 echo 'generate .zkey file...'
-snarkjs groth16 setup ../passcode.r1cs ../passcode_js/pot12_final.ptau ../passcode_js/passcode_0000.zkey
+snarkjs groth16 setup ../passcode.r1cs pot12_final.ptau passcode_0000.zkey
 
 echo 'contribute to the phase 2 of the ceremony...'
-snarkjs zkey contribute ../passcode_js/passcode_0000.zkey ../passcode_js/passcode_0001.zkey --name="1st Contributor Name" -v -e="$rnd2"
+snarkjs zkey contribute passcode_0000.zkey passcode_0001.zkey --name="1st Contributor Name" -v
 
 echo 'generate solidity code...'
-snarkjs zkey export solidityverifier ../passcode_js/passcode_0001.zkey ../contracts/verifier.sol
+snarkjs zkey export verificationkey passcode_0001.zkey verification_key.json
 
-echo 'export the verification key...'
-snarkjs zkey export verificationkey ../passcode_js/passcode_0001.zkey ../passcode_js/verification_key.json
+snarkjs zkey export solidityverifier passcode_0001.zkey ../contracts/Verifier.sol
