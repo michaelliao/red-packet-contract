@@ -7,10 +7,10 @@ template Passcode() {
     signal input secret;
     signal output out;
 
-    component hash = MiMC7(6);
+    component hash = MiMC7(3);
 
     hash.x_in <== (addr + secret);
-    hash.k <== 1234567;
+    hash.k <== 123456789;
     out <== hash.out;
 }
 
