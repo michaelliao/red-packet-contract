@@ -670,7 +670,7 @@
                                     rp = await rpContract.getRedPacket(redPacket.id);
                                 console.log('loaded red packet:', rp);
                                 this.redPacket.setRedPacketInfo(rp);
-                                if (this.redPacket.token === this.redPacket.ethAddress) {
+                                if (this.redPacket.token.toLowerCase() === this.redPacket.ethAddress) {
                                     let
                                         c = deployedChains[this.redPacket.chain],
                                         symbol = c && c.nativeTokenName || 'ETH';
