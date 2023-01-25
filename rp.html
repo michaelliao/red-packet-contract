@@ -423,39 +423,6 @@
             return await snarkjs.groth16.fullProve({ addr: addrBN.toString(), secret: secretBN.toString() }, "passcode_js/passcode.wasm", "passcode_js/passcode_0001.zkey");
         }
 
-        async function test2() {
-            console.log(redPacket.redPacketAddress);
-            let c = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
-            let r = await c.verifyProof(["0x0b8c60649960cf2cc4f8a994dbd8f6f1d0d00b55540d37abb6bec333f27b24c3", "0x06026a38f848927ce73732680f53186d6bef92a827046ff22591ee0cfb8d5d2b"], [["0x1135aff3f21aed8698ee9dd3c171713fa6251daaf6e2e3ef8d1a51f59ecb9f36", "0x0d02ce49956fd027daa750136e830207cb83873a988c77aa507594580bd0220c"], ["0x2335507bfe41f6f993234e51e7358375da6c00569284b4bbf08860686b2960a3", "0x2ddd72019b6dc1eba0d9485676967a3a1fef9ff8b2fb3ece23b6b5fdd61afb64"]], ["0x179503d4fafb33a838fd9934e4a7155ea679fcc6a1c3292e708933118b9b90c5", "0x1d50dbb929fad057bc7ab741f12397689f7506fba33a21db087a5b5985a127b6"], ["0x02ef7bb233877d0f7da69147ce653c378ff5af8bc7afc44de20ea49b7a249b47", "0x000000000000000000000000000000000000000000000042ed123aef1abb7ef2"]);
-            console.log(r);
-        }
-
-        async function test3(a, b, c, i) {
-            let rp = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
-            let r = await rp.verifyProof(a, b, c, i);
-            console.log(r);
-        }
-
-        async function test() {
-            let accountBN = ethers.BigNumber.from('0x98fd82fbcb774cefa23e6e3fdc24e098bd665da6');
-            let secretBN = ethers.BigNumber.from('0x29bf85b7cb865170aed033cd9bbe884cadde50c55b68476a0ab747e7d07fd420');
-            let { proof, publicSignals } = await prove(accountBN, secretBN);
-            console.log('proof:\n' + JSON.stringify(proof, null, 2) + '\n' + JSON.stringify(publicSignals, null, 2));
-            let proofs = [proof.pi_a[0], proof.pi_a[1], proof.pi_b[0][0], proof.pi_b[0][1], proof.pi_b[1][0], proof.pi_b[1][1], proof.pi_c[0], proof.pi_c[1], publicSignals[0], publicSignals[1]];
-            for (let i = 0; i < proofs.length; i++) {
-                proofs[i] = ethers.BigNumber.from(proofs[i]).toHexString();
-                console.log('proof ' + i + ' = ', proofs[i]);
-            }
-            console.log('proof = ' + proofs);
-            let c = new ethers.Contract(redPacket.redPacketAddress, redPacket.redPacketABI, getWeb3Provider().getSigner());
-            let r = await c.verifyProof([proofs[0], proofs[1]],
-                [[proofs[2], proofs[3]], [proofs[4], proofs[5]]],
-                [proofs[6], proofs[7]],
-                [proofs[8], proofs[9]]
-            );
-            console.log(r);
-        }
-
         function keccak(str) {
             let arr = new TextEncoder().encode(str);
             return ethers.utils.keccak256(arr);
