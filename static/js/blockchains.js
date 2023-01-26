@@ -1,6 +1,6 @@
-
 // auto-generated
-window.ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+window.ETH_ADDRESS  = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+window.ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 window.BLOCKCHAINS = {
   "1": {
     "id": 1,

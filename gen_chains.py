@@ -60,9 +60,9 @@ def main():
         else:
             print(f'ERROR: NO native token found for chain {chainName}')
 
-    js = r'''
-// auto-generated
-window.ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+    js = r'''// auto-generated
+window.ETH_ADDRESS  = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+window.ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 '''
     js = js + 'window.BLOCKCHAINS = '+ json.dumps(all, indent=2)
     print(js)

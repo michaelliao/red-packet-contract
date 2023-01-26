@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
 
-    <script src="/static/js/icons.js"></script>
+    <script src="/static/js/blockchains.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
@@ -149,42 +149,6 @@
     </script>
 
     <script>
-        class Chain {
-            #id;
-            #name;
-            #scanUrl;
-            #nativeTokenName;
-            #popularTokens;
-
-            constructor(id, name, scanUrl, nativeTokenName, popularTokens = []) {
-                this.#id = id;
-                this.#name = name;
-                this.#scanUrl = scanUrl;
-                this.#nativeTokenName = nativeTokenName;
-                this.#popularTokens = popularTokens;
-            }
-
-            get id() {
-                return this.#id;
-            }
-
-            get name() {
-                return this.#name;
-            }
-
-            get scanUrl() {
-                return this.#scanUrl;
-            }
-
-            get nativeTokenName() {
-                return this.#nativeTokenName;
-            }
-
-            get popularTokens() {
-                return this.#popularTokens;
-            }
-        }
-
         class Token {
             #address;
             #symbol;
@@ -283,14 +247,6 @@
 
             get erc20ABI() {
                 return '[{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]';
-            }
-
-            get zeroAddress() {
-                return '0x0000000000000000000000000000000000000000';
-            }
-
-            get ethAddress() {
-                return '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
             }
 
             rpParamsMessageForSign(rpParams) {
@@ -396,28 +352,6 @@
         }
 
         window.redPacket = new RedPacket();
-
-        window.deployedChains = {}
-
-        function addChain(chain) {
-            window.deployedChains[chain.id] = chain;
-        }
-
-        addChain(new Chain(1, 'Ethereum', 'https://etherscan.io', 'ETH'));
-        addChain(new Chain(5, 'Goerli Testnet', 'https://goerli.etherscan.io', 'gETH'));
-        addChain(new Chain(56, 'BSC', 'https://bscscan.com', 'BNB'));
-        addChain(new Chain(97, 'BSC Testnet', 'https://testnet.bscscan.com', 'tBNB'));
-
-        window.CHAINS = {
-            // chainId: ['name', 'https://scanurl', 'sortBy']
-            '1': ['Ethereum', 'https://etherscan.io', 10],
-            '56': ['BSC', 'https://bscscan.com', 20],
-            '137': ['Polygon', 'https://polygonscan.com', 30],
-            '128': ['Heco', 'https://hecoinfo.com', 90],
-            '5': ['Goerli Testnet', 'https://goerli.etherscan.io', 10010],
-            '97': ['BSC Testnet', 'https://testnet.bscscan.com', 10020],
-            '80001': ['Ploygon Testnet', 'https://mumbai.polygonscan.com', 10030]
-        };
 
         async function prove(addrBN, secretBN) {
             return await snarkjs.groth16.fullProve({ addr: addrBN.toString(), secret: secretBN.toString() }, "passcode_js/passcode.wasm", "passcode_js/passcode_0001.zkey");
@@ -577,11 +511,11 @@
                     },
                     tokenIconUrl: function () {
                         if (this.token && this.token.address) {
-                            let icons = window.ICONS[this.redPacket.chain];
-                            if (icons) {
-                                let icon = icons[this.token.address.toLowerCase()];
-                                if (icon) {
-                                    return icon;
+                            let ch = window.BLOCKCHAINS[this.redPacket.chain];
+                            if (ch) {
+                                t = ch.tokens.find(t => t.address === this.token.address.toLowerCase());
+                                if (t) {
+                                    return t.icon;
                                 }
                             }
                         }
@@ -597,6 +531,13 @@
                         }
                         return 'none';
                     },
+                    openImage: function () {
+                        let i = this.redPacket.getRpOpenImage();
+                        if (i) {
+                            return i;
+                        }
+                        return 'money.svg';
+                    },
                     invalid: function () {
                         return isNaN(this.redPacket.chain) || isNaN(this.redPacket.id);
                     },
@@ -606,7 +547,7 @@
                     networkName: function () {
                         if (this.account) {
                             if (this.chainId === this.redPacket.chain) {
-                                let c = deployedChains[this.chainId];
+                                let c = window.BLOCKCHAINS[this.chainId];
                                 if (c) {
                                     return c.name;
                                 }
@@ -616,7 +557,7 @@
                         return 'Not Connected';
                     },
                     correctNetworkName: function () {
-                        let c = deployedChains[this.redPacket.chain];
+                        let c = window.BLOCKCHAINS[this.redPacket.chain];
                         if (c) {
                             return c.name;
                         }
@@ -637,11 +578,11 @@
                                     rp = await rpContract.getRedPacket(redPacket.id);
                                 console.log('loaded red packet:', rp);
                                 this.redPacket.setRedPacketInfo(rp);
-                                if (this.redPacket.token.toLowerCase() === this.redPacket.ethAddress) {
+                                if (this.redPacket.token.toLowerCase() === window.ETH_ADDRESS) {
                                     let
-                                        c = deployedChains[this.redPacket.chain],
-                                        symbol = c && c.nativeTokenName || 'ETH';
-                                    this.token = new Token(this.redPacket.ethAddress, symbol, 18);
+                                        c = window.BLOCKCHAINS[this.redPacket.chain],
+                                        symbol = c && c.native || 'ETH';
+                                    this.token = new Token(window.ETH_ADDRESS, symbol, 18);
                                 } else {
                                     // load ERC:
                                     let
@@ -755,17 +696,17 @@
                         return s;
                     },
                     tokenUrl: function (addr) {
-                        let c = deployedChains[this.chainId];
+                        let c = window.BLOCKCHAINS[this.chainId];
                         if (c) {
-                            return c.scanUrl + '/token/' + addr;
+                            return c.scan + '/token/' + addr;
                         } else {
                             return '#1';
                         }
                     },
                     gotoScanUrl: function () {
-                        let c = deployedChains[this.chainId];
+                        let c = window.BLOCKCHAINS[this.chainId];
                         if (c) {
-                            window.open(c.scanUrl + '/address/' + this.account);
+                            window.open(c.scan + '/address/' + this.account);
                         } else {
                             console.error('Invalid chain id: ', this.chainId);
                         }
@@ -1009,7 +950,7 @@
                                 <div class="triangle triangle-2-cover"></div>
                                 <div class="rectangle-bottom"></div>
                                 <div v-on:click="openRedPacket" v-show="!opened" class="circle can-open">
-                                    <img src="money.svg">
+                                    <img v-bind:src="openImage">
                                 </div>
                             </div>
                         </div>
