@@ -866,20 +866,20 @@
     </div>
 
     <div id="vm" class="container" style="display:none">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom"
-            style="position:fixed; top:0; left:0; right:0; z-index: 99;">
+        <nav class="navbar navbar-expand-lg navbar-light"
+            style="position:fixed; top:0; left:0; right:0; z-index: 99; background-image: url(/static/img/nav.png); background-size: cover;">
             <div class="container">
-                <a class="navbar-brand" href="/"><i class="bi bi-envelope-paper"></i> New Red Packet</a>
+                <a class="navbar-brand text-white" href="/">Create Red Packet</a>
                 <ul id="wallet" class="mr-2 navbar-nav navbar-right-wrap" style="flex-direction: row !important;">
                     <li class="nav-item">
-                        <span class="nav-link"><i class="bi bi-globe"></i>
+                        <span class="nav-link text-white"><i class="bi bi-globe"></i>
                             <span v-text="networkName"></span></span>
                     </li>
                     <li v-if="account===null" class="nav-item">
-                        <button v-on:click="connectWallet" type="button" class="btn btn-primary">Connect Wallet</button>
+                        <button v-on:click="connectWallet" type="button" class="btn btn-light">Connect Wallet</button>
                     </li>
                     <li v-if="account!==null" class="nav-item">
-                        <a href="#0" class="nav-link" v-on:click="gotoScanUrl"><i class="bi bi-wallet"></i>
+                        <a href="#0" class="nav-link text-white" v-on:click="gotoScanUrl"><i class="bi bi-wallet"></i>
                             <span v-text="abbrAddress(account)"></span> <i class="fe fe-external-link"></i></a>
                     </li>
                 </ul>
