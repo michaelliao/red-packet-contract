@@ -5,8 +5,7 @@
 # pip3 install pyyaml
 #
 
-import os, re, yaml
-import json 
+import os, re, yaml, json 
 
 
 def main():
@@ -19,29 +18,56 @@ def main():
     for k, v in icon_files.items():
         print(f'found token: {k} => {v}')
 
-    with open(os.path.join(base_dir, 'tokens.yml'), 'r') as fp:
+    with open(os.path.join(base_dir, 'chains.yml'), 'r') as fp:
         chains = yaml.load(fp, Loader=yaml.BaseLoader)
 
-    icons = {}
+    all = {}
+    default_icon_file = '/static/icons/default.svg'
+
     for chainName, chainInfo in chains.items():
         chainId = chainInfo['chain']
-        addrs = {}
-        icons[chainId] = addrs
+        chain = {}
+        chain['id'] = int(chainId)
+        chain['name'] = chainName
+        chain['scan'] = chainInfo['scan']
+        chain['testnet'] = chainName.lower().find('testnet') >= 0
+        chain['native'] = '*ETH*'
+        chain['tokens'] = []
+        all[chainId] = chain
         print(f'found chain: {chainName} => {chainId}')
-        tokens = merge_tokens(chainInfo['tokens'])
-        for token, address in tokens.items():
-            if re.match(r'^0x[0-9a-fA-F]{40}$', address):
-                if token in icon_files:
-                    addrs[address.lower()] = icon_files[token]
+        # tokenName -> tokenAddress
+        tokenAddrs = merge_tokens(chainInfo['tokens'])
+        nativeToken = None
+        for tokenName, tokenAddress in tokenAddrs.items():
+            token = {
+                'symbol': tokenName.upper(),
+                'address': tokenAddress.lower()
+            }
+            chain['tokens'].append(token)
+            # find icon file:
+            if re.match(r'^0x[0-9a-fA-F]{40}$', tokenAddress):
+                if tokenName in icon_files:
+                    token['icon'] = icon_files[tokenName]
                 else:
-                    print(f'WARN: token {token} has no icon.');
+                    print(f'WARN: token {tokenName} has no icon.');
+                    token['icon'] = default_icon_file
+                if re.match(r'^0x[eE]{40}$', tokenAddress):
+                    nativeToken = tokenName.upper()
             else:
-                print(f'ERROR: invalid address {address} for token {token}')
+                print(f'ERROR: invalid address {tokenAddress} for token {tokenName}')
+        if nativeToken:
+            chain['native'] = nativeToken
+        else:
+            print(f'ERROR: NO native token found for chain {chainName}')
 
-    js = '// auto-generated\nwindow.ICONS = '+ json.dumps(icons, indent=2)
+    js = r'''
+// auto-generated
+window.ETH_ADDRESS = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+'''
+    js = js + 'window.BLOCKCHAINS = '+ json.dumps(all, indent=2)
     print(js)
 
-    with open(os.path.join(base_dir, 'static', 'js', 'icons.js'), 'w') as f:
+    with open(os.path.join(base_dir, 'static', 'js', 'blockchains.js'), 'w') as f:
         f.write(js)
 
 
