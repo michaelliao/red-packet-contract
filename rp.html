@@ -880,14 +880,13 @@
                     </li>
                     <li v-if="account!==null" class="nav-item">
                         <a href="#0" class="nav-link text-white" v-on:click="gotoScanUrl"><i class="bi bi-wallet"></i>
-                            <span v-text="abbrAddress(account)"></span> <i class="fe fe-external-link"></i></a>
+                            <span v-text="abbrAddress(account)"></span></a>
                     </li>
                 </ul>
             </div>
         </nav>
 
         <div class="pb-5" style="padding-top: 80px;">
-
             <div v-show="invalid" class="row g-0 mt-4">
                 <div class="col text-center">
                     <p class="fs-1">Red Packet Not Found</p>
