@@ -20,8 +20,23 @@
     <style>
         body {
             height: 100vh;
-            background-size: cover;
-            background-image: linear-gradient(22deg, #9943c7 0%, #C850C0 33%, #ffa770 100%);
+            background-size: 400% 400%;
+            background-image: linear-gradient(45deg, #C850C0 0%, #ff9a70 66%, #ffcc70 100%);
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         .red-packet {
