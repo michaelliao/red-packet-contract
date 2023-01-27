@@ -30,6 +30,21 @@ Ethereum:
     - yfi:   0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e
     - weth:  0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
 
+Optimistic:
+  chain: 10
+  scan: https://optimistic.etherscan.io/
+  rpc: https://mainnet.optimism.io/
+  tokens:
+    - eth:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    - op:   0x4200000000000000000000000000000000000042
+    - usdt: 0x94b008aa00579c1307b0ef2c499ad98a8ce58e58
+    - usdc: 0x7f5c764cbc14f9669b88837ca1490cca17c31607
+    - dai:  0xda10009cbd5d07dd0cecc66161fc93d7c9000da1
+    - wbtc: 0x68f180fcce6836688e9084f035309e29bf0a2095
+    - link: 0x350a791bfc2c21f9ed5d10980dad2e2638ffa7f6
+    - uni:  0x6fd9d7ad17242c41f7131d257212c54a0e816691
+    - aave: 0x76fb31fb4af56892a25e32cfc43de717950c9278
+
 BSC:
   chain: 56
   scan: https://bscscan.com

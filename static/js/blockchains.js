@@ -142,6 +142,61 @@ window.BLOCKCHAINS = {
       }
     ]
   },
+  "10": {
+    "id": 10,
+    "name": "Optimistic",
+    "scan": "https://optimistic.etherscan.io/",
+    "rpc": "https://mainnet.optimism.io/",
+    "testnet": false,
+    "native": "ETH",
+    "tokens": [
+      {
+        "symbol": "ETH",
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "icon": "/static/icons/eth.svg"
+      },
+      {
+        "symbol": "OP",
+        "address": "0x4200000000000000000000000000000000000042",
+        "icon": "/static/icons/op.svg"
+      },
+      {
+        "symbol": "USDT",
+        "address": "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
+        "icon": "/static/icons/usdt.svg"
+      },
+      {
+        "symbol": "USDC",
+        "address": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+        "icon": "/static/icons/usdc.svg"
+      },
+      {
+        "symbol": "DAI",
+        "address": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+        "icon": "/static/icons/dai.svg"
+      },
+      {
+        "symbol": "WBTC",
+        "address": "0x68f180fcce6836688e9084f035309e29bf0a2095",
+        "icon": "/static/icons/wbtc.svg"
+      },
+      {
+        "symbol": "LINK",
+        "address": "0x350a791bfc2c21f9ed5d10980dad2e2638ffa7f6",
+        "icon": "/static/icons/link.svg"
+      },
+      {
+        "symbol": "UNI",
+        "address": "0x6fd9d7ad17242c41f7131d257212c54a0e816691",
+        "icon": "/static/icons/uni.svg"
+      },
+      {
+        "symbol": "AAVE",
+        "address": "0x76fb31fb4af56892a25e32cfc43de717950c9278",
+        "icon": "/static/icons/aave.svg"
+      }
+    ]
+  },
   "56": {
     "id": 56,
     "name": "BSC",
