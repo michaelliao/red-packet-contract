@@ -688,7 +688,8 @@
                             let url = location.protocol + '//' + location.host + location.pathname + '?' + urlSearch.toString();
                             let h = '<div class="mb-2">You have successfully generated the customized URL for this red packet:</div>' +
                                 '<form><input class="form-control" readonly style="width: 80%" value="' + url + '"></form>' +
-                                '<div class="mt-2"><a href="#0" onclick="navigator.clipboard.writeText(\'' + url + '\')">Copy</a> &nbsp;&nbsp; <a target="_blank" href="' + url + '">Open URL</a></div>';
+                                '<div class="mt-2"><a href="#0" onclick="navigator.clipboard.writeText(\'' + url + '\');window.open(\'https://tinyurl.com/\');">Copy &amp; Shorten URL</a> - <a target="_blank" href="' + url +
+                                '">Open URL</a></div>';
                             showInfo('Red Packet Customized URL', h);
                         } catch (err) {
                             showAlert('Error', translateError(err));
