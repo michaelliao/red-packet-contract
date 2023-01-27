@@ -414,6 +414,13 @@
             }
         }
 
+        function getRpcProvider(rpcUrl) {
+            return new ethers.providers.JsonRpcProvider({
+                url: rpcUrl,
+                timeout: 20000
+            });
+        }
+
         function getWeb3Provider() {
             if (!window.web3Provider) {
                 if (!window.ethereum) {
@@ -623,36 +630,36 @@
                         if (this.loaded) {
                             return;
                         }
-                        if (this.chainId === redPacket.chain) {
-                            console.log('start load redpacket...');
-                            this.loading = true;
-                            try {
+                        let useInjectedProvider = this.chainId === this.redPacket.chain;
+                        console.log('start load redpacket...');
+                        this.loading = true;
+                        try {
+                            let
+                                provider = useInjectedProvider ? window.getWeb3Provider() : getRpcProvider(window.BLOCKCHAINS[this.redPacket.chain].rpc),
+                                rpContract = new ethers.Contract(this.redPacket.redPacketAddress, this.redPacket.redPacketABI, useInjectedProvider ? provider.getSigner() : provider),
+                                rp = await rpContract.getRedPacket(this.redPacket.id);
+                            console.log('loaded red packet:', rp);
+                            this.redPacket.setRedPacketInfo(rp);
+                            this.redPacket.verifyParams();
+                            this.version++;
+                            if (this.redPacket.token.toLowerCase() === window.ETH_ADDRESS) {
                                 let
-                                    rpContract = new ethers.Contract(this.redPacket.redPacketAddress, this.redPacket.redPacketABI, window.getWeb3Provider().getSigner()),
-                                    rp = await rpContract.getRedPacket(redPacket.id);
-                                console.log('loaded red packet:', rp);
-                                this.redPacket.setRedPacketInfo(rp);
-                                this.redPacket.verifyParams();
-                                this.version++;
-                                if (this.redPacket.token.toLowerCase() === window.ETH_ADDRESS) {
-                                    let
-                                        c = window.BLOCKCHAINS[this.redPacket.chain],
-                                        symbol = c && c.native || 'ETH';
-                                    this.token = new Token(window.ETH_ADDRESS, symbol, 18);
-                                } else {
-                                    // load ERC:
-                                    let
-                                        ercContract = new ethers.Contract(this.redPacket.token, this.redPacket.erc20ABI, window.getWeb3Provider().getSigner()),
-                                        symbol = await ercContract.symbol(),
-                                        decimals = await ercContract.decimals();
-                                    this.token = new Token(this.redPacket.token, symbol, decimals);
-                                }
-                                this.loaded = true;
-                            } catch (err) {
-                                console.error(err);
+                                    c = window.BLOCKCHAINS[this.redPacket.chain],
+                                    symbol = c && c.native || 'ETH';
+                                this.token = new Token(window.ETH_ADDRESS, symbol, 18);
+                            } else {
+                                // load ERC:
+                                let
+                                    ercContract = new ethers.Contract(this.redPacket.token, this.redPacket.erc20ABI, useInjectedProvider ? provider.getSigner() : provider),
+                                    symbol = await ercContract.symbol(),
+                                    decimals = await ercContract.decimals();
+                                this.token = new Token(this.redPacket.token, symbol, decimals);
                             }
-                            this.loading = false;
+                            this.loaded = true;
+                        } catch (err) {
+                            console.error(err);
                         }
+                        this.loading = false;
                     },
                     signUrl: async function () {
                         try {
@@ -851,9 +858,10 @@
                         return true;
                     }
                 },
-                mounted: function () {
+                mounted: async function () {
                     $('#vm').show();
-                    this.connectWallet();
+                    await this.connectWallet();
+                    await this.loadRedPacket();
                 }
             });
         }
