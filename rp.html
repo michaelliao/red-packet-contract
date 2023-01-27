@@ -191,25 +191,24 @@
 
             // private:
             #rpParams = {};
-            #rpSig;
-            #rpValid = false;
+            #sig;
+            #sigValid = false;
+            #preview = false;
 
             constructor() {
                 const urlSearchParams = new URLSearchParams(window.location.search);
                 this.chain = parseInt(urlSearchParams.get('chain'));
                 this.id = parseInt(urlSearchParams.get('id'));
-                // verify signature of rpXxx params:
-                let sig = null;
+                // verify signature of rpXxx params: 
                 for (let [k, v] of urlSearchParams) {
                     if (k.startsWith('rp')) {
                         console.log(k, '=', v);
                         this.#rpParams[k] = v;
                     } else if (k === 'sig') {
-                        sig = v;
+                        this.#sig = v;
+                    } else if (k == 'preview') {
+                        this.#preview = v === 'true';
                     }
-                }
-                if (sig) {
-                    this.#rpSig = sig;
                 }
             }
 
@@ -249,21 +248,40 @@
                 return '[{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]';
             }
 
-            rpParamsMessageForSign(rpParams) {
-                let params = [];
-                for (let [k, v] of rpParams) {
-                    params.push(k + '=' + v);
+            getRpParamsMessageForSign() {
+                let params = ['chain=' + this.chain, 'id=' + this.id];
+                for (let k in this.#rpParams) {
+                    if (k.startsWith('rp')) {
+                        params.push(k + '=' + this.#rpParams[k]);
+                    }
                 }
                 params.sort();
                 return params.join('&');
             }
 
-            validateParams(creatorAddress) {
-                let message = this.rpParamsMessageForSign(this.#rpParams);
-                console.log('validateParams: message = ' + message);
-                let recoveredAddress = ethers.utils.verifyMessage(message, this.#rpSig);
-                console.log('validateParams: recovered = ' + recoveredAddress);
-                this.#rpValid = recoveredAddress === creatorAddress;
+            verifyParams() {
+                if (!this.#sig) {
+                    console.log('skip verify params for no sig found.');
+                } else {
+                    console.log('verify params with address: ' + this.creator);
+                    try {
+                        let message = this.getRpParamsMessageForSign();
+                        console.log('verifyParams: message = ' + message);
+                        let recoveredAddress = ethers.utils.verifyMessage(message, this.#sig);
+                        console.log('verifyParams: recovered = ' + recoveredAddress);
+                        this.#sigValid = recoveredAddress.toLowerCase() === this.creator.toLowerCase();
+                        console.log('verify: ' + this.#sigValid);
+                        if (!this.#sigValid) {
+                            throw 'invalid parameter sig'
+                        }
+                    } catch (err) {
+                        console.error('failed verify params signature.', err);
+                    }
+                }
+            }
+
+            get preview() {
+                return this.#preview;
             }
 
             getRpCreator(creatorAddress) {
@@ -286,6 +304,10 @@
                 return this.getRpParam('rpOpenImage');
             }
 
+            getRpIconImage() {
+                return this.getRpParam('rpIconImage');
+            }
+
             getRpDisplayOpenInfo(display = true) {
                 let p = this.getRpParam('rpDisplayOpenInfo');
                 if (p === undefined || p === null) {
@@ -294,8 +316,12 @@
                 return p !== 'false';
             }
 
+            getRpParams() {
+                return this.#rpParams;
+            }
+
             getRpParam(k, defaultValue) {
-                if (this.#rpValid || true /* FIXME skip verify */) {
+                if (this.#sigValid || this.preview) {
                     let v = this.#rpParams[k];
                     if (v === undefined || v === null) {
                         return defaultValue;
@@ -481,10 +507,12 @@
                     toAddress: '',
                     password: '',
                     token: null,
-                    redPacket: redPacket
+                    redPacket: redPacket,
+                    version: 0 // just used to update computed property
                 },
                 computed: {
                     creatorName: function () {
+                        this.version;
                         let addr = this.redPacket.creator;
                         if (!addr) {
                             return '';
@@ -492,24 +520,33 @@
                         return this.redPacket.getRpCreator(addr);
                     },
                     greeting: function () {
+                        this.version;
                         return this.redPacket.getRpGreeting() || 'Best Wishes!';
                     },
                     amount: function () {
+                        this.version;
                         if (this.token) {
                             return this.redPacket.abbrBN(this.redPacket.amount, this.token.decimals);
                         }
                     },
                     amountLeft: function () {
+                        this.version;
                         if (this.token) {
                             return this.redPacket.abbrBN(this.redPacket.amountLeft, this.token.decimals);
                         }
                     },
                     bonus: function () {
+                        this.version;
                         if (this.token && this.bonusBN) {
                             return this.redPacket.abbrBN(this.bonusBN, this.token.decimals);
                         }
                     },
                     tokenIconUrl: function () {
+                        this.version;
+                        let icon = this.redPacket.getRpIconImage();
+                        if (icon) {
+                            return icon;
+                        }
                         if (this.token && this.token.address) {
                             let ch = window.BLOCKCHAINS[this.redPacket.chain];
                             if (ch) {
@@ -522,9 +559,11 @@
                         return '/static/icons/default.svg';
                     },
                     displayOpenInfo: function () {
+                        this.version;
                         return this.redPacket.getRpDisplayOpenInfo();
                     },
                     coverImage: function () {
+                        this.version;
                         let i = this.redPacket.getRpCoverImage();
                         if (i) {
                             return 'url(' + i + ')';
@@ -532,11 +571,22 @@
                         return 'none';
                     },
                     openImage: function () {
+                        this.version;
                         let i = this.redPacket.getRpOpenImage();
                         if (i) {
                             return i;
                         }
                         return 'money.svg';
+                    },
+                    canCustomize: function () {
+                        this.version;
+                        if (this.account && this.redPacket.creator && this.account.toLowerCase() === this.redPacket.creator.toLowerCase()) {
+                            return true;
+                        }
+                        return false;
+                    },
+                    customizeUrl: function () {
+                        return location.pathname + '?chain=' + this.redPacket.chain + '&id=' + this.redPacket.id + '&preview=true';
                     },
                     invalid: function () {
                         return isNaN(this.redPacket.chain) || isNaN(this.redPacket.id);
@@ -578,6 +628,8 @@
                                     rp = await rpContract.getRedPacket(redPacket.id);
                                 console.log('loaded red packet:', rp);
                                 this.redPacket.setRedPacketInfo(rp);
+                                this.redPacket.verifyParams();
+                                this.version++;
                                 if (this.redPacket.token.toLowerCase() === window.ETH_ADDRESS) {
                                     let
                                         c = window.BLOCKCHAINS[this.redPacket.chain],
@@ -598,7 +650,46 @@
                             this.loading = false;
                         }
                     },
+                    signUrl: async function () {
+                        try {
+                            if (!this.account) {
+                                throw 'Please connect with MetaMask first.';
+                            }
+                            if (!this.redPacket) {
+                                throw 'Failed to load red packet.';
+                            }
+                            if (this.redPacket.creator.toLowerCase() !== this.account.toLowerCase()) {
+                                throw 'You must sign the URL with creator address: ' + this.redPacket.abbrAddress(this.redPacket.creator);
+                            }
+                            let msg = this.redPacket.getRpParamsMessageForSign();
+                            let sig = await getWeb3Provider().getSigner().signMessage(msg);
+                            console.log(sig);
+                            // now generate url:
+                            let
+                                params = this.redPacket.getRpParams(),
+                                urlSearch = new URLSearchParams();
+                            urlSearch.append('chain', this.redPacket.chain);
+                            urlSearch.append('id', this.redPacket.id);
+                            for (let k in params) {
+                                urlSearch.append(k, params[k]);
+                            }
+                            urlSearch.append('sig', sig);
+                            let url = location.protocol + '//' + location.host + location.pathname + '?' + urlSearch.toString();
+                            let h = '<div class="mb-2">You have successfully generated the customized URL for this red packet:</div>' +
+                                '<form><input class="form-control" readonly style="width: 80%" value="' + url + '"></form>' +
+                                '<div class="mt-2"><a href="#0" onclick="navigator.clipboard.writeText(\'' + url + '\')">Copy</a> &nbsp;&nbsp; <a target="_blank" href="' + url + '">Open URL</a></div>';
+                            showInfo('Red Packet Customized URL', h);
+                        } catch (err) {
+                            showAlert('Error', translateError(err));
+                        }
+                    },
                     openRedPacket: function () {
+                        if (this.redPacket.preview) {
+                            this.bonusBN = ethers.utils.parseUnits('1', this.token.decimals);
+                            this.toAddress = this.redPacket.abbrAddress('0xa1b200000000000000000000000000000000e8f9');
+                            this.opened = true;
+                            return;
+                        }
                         let that = this;
                         showInput(function (password) {
                             if (password.trim() !== '') {
@@ -856,7 +947,7 @@
                         <i class="fs-2 fe fe-info"></i>
                     </div>
                     <div class="ms-5 ps-4 float-none">
-                        <p class="x-message">&nbsp;</p>
+                        <div class="x-message">&nbsp;</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -908,6 +999,13 @@
 
             <div v-show="!invalid && loaded" class="row g-0 mt-4">
                 <div class="col">
+                    <div v-if="redPacket.preview" class="alert alert-warning text-center mb-4" role="alert">
+                        You are customize the red packet. Create the final URL by
+                        <a href="#0" v-on:click="signUrl">sign the parameters</a>.
+                        Check the <a target="_blank"
+                            href="https://github.com/michaelliao/red-packet-contract/blob/master/docs/customize.md">document</a>
+                        for customization.
+                    </div>
                     <div class="container g-0 red-packet">
                         <div class="card golden-border">
                             <div class="card-body p-0" v-bind:style="{'background-image':coverImage}">
@@ -954,6 +1052,9 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div v-show="canCustomize" class="mt-4 mb-4 text-center text-white">
+                        <a v-bind:href="customizeUrl" target="_blank" class="text-white">Customize Your Red Packet</a>
                     </div>
                 </div>
             </div>
