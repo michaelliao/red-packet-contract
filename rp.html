@@ -690,6 +690,9 @@
                             this.opened = true;
                             return;
                         }
+                        if (this.redPacket.totalLeft === 0) {
+                            return showAlert('Error', 'Red packet is empty. Hurry up next time!');
+                        }
                         let that = this;
                         showInput(function (password) {
                             if (password.trim() !== '') {
