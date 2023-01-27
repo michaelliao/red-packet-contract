@@ -6,6 +6,7 @@ window.BLOCKCHAINS = {
     "id": 1,
     "name": "Ethereum",
     "scan": "https://etherscan.io",
+    "rpc": "https://mainnet.infura.io/v3/7802434607344fdf98c7bdcf359f5b61",
     "testnet": false,
     "native": "ETH",
     "tokens": [
@@ -145,6 +146,7 @@ window.BLOCKCHAINS = {
     "id": 56,
     "name": "BSC",
     "scan": "https://bscscan.com",
+    "rpc": "https://bsc-dataseed.binance.org/",
     "testnet": false,
     "native": "BNB",
     "tokens": [
@@ -234,6 +236,7 @@ window.BLOCKCHAINS = {
     "id": 66,
     "name": "OKChain",
     "scan": "https://www.oklink.com/okc",
+    "rpc": "https://exchainrpc.okex.org/",
     "testnet": false,
     "native": "OKT",
     "tokens": [
@@ -278,6 +281,7 @@ window.BLOCKCHAINS = {
     "id": 128,
     "name": "Heco",
     "scan": "https://www.hecoinfo.com",
+    "rpc": "https://http-mainnet.hecochain.com/",
     "testnet": false,
     "native": "HT",
     "tokens": [
@@ -327,6 +331,7 @@ window.BLOCKCHAINS = {
     "id": 137,
     "name": "Polygon",
     "scan": "https://polygonscan.com",
+    "rpc": "https://polygon-rpc.com/",
     "testnet": false,
     "native": "MATIC",
     "tokens": [
@@ -441,6 +446,7 @@ window.BLOCKCHAINS = {
     "id": 250,
     "name": "Fantom",
     "scan": "https://ftmscan.com",
+    "rpc": "https://rpcapi.fantom.network/",
     "testnet": false,
     "native": "FTM",
     "tokens": [
@@ -510,6 +516,7 @@ window.BLOCKCHAINS = {
     "id": 42161,
     "name": "Arbitrum",
     "scan": "https://arbiscan.io",
+    "rpc": "https://arb1.arbitrum.io/rpc",
     "testnet": false,
     "native": "ETH",
     "tokens": [
@@ -594,6 +601,7 @@ window.BLOCKCHAINS = {
     "id": 43114,
     "name": "Avalanche",
     "scan": "https://snowtrace.io",
+    "rpc": "https://api.avax.network/ext/bc/C/rpc",
     "testnet": false,
     "native": "AVAX",
     "tokens": [
@@ -668,6 +676,7 @@ window.BLOCKCHAINS = {
     "id": 5,
     "name": "Goerli-Testnet",
     "scan": "https://goerli.etherscan.io",
+    "rpc": "https://goerli.infura.io/v3/7802434607344fdf98c7bdcf359f5b61",
     "testnet": true,
     "native": "ETH",
     "tokens": [
@@ -697,6 +706,7 @@ window.BLOCKCHAINS = {
     "id": 97,
     "name": "BSC-Testnet",
     "scan": "https://testnet.bscscan.com",
+    "rpc": "https://data-seed-prebsc-1-s3.binance.org:8545/",
     "testnet": true,
     "native": "BNB",
     "tokens": [
@@ -726,6 +736,7 @@ window.BLOCKCHAINS = {
     "id": 80001,
     "name": "Polygon-Testnet",
     "scan": "https://mumbai.polygonscan.com",
+    "rpc": "https://matic-mumbai.chainstacklabs.com/",
     "testnet": true,
     "native": "MATIC",
     "tokens": [

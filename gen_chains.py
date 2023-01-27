@@ -30,6 +30,7 @@ def main():
         chain['id'] = int(chainId)
         chain['name'] = chainName
         chain['scan'] = chainInfo['scan']
+        chain['rpc'] = chainInfo['rpc']
         chain['testnet'] = chainName.lower().find('testnet') >= 0
         chain['native'] = '*ETH*'
         chain['tokens'] = []

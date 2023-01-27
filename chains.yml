@@ -1,6 +1,7 @@
 Ethereum:
   chain: 1
   scan: https://etherscan.io
+  rpc: https://mainnet.infura.io/v3/7802434607344fdf98c7bdcf359f5b61
   tokens:
     - eth:   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt:  0xdac17f958d2ee523a2206206994597c13d831ec7
@@ -32,6 +33,7 @@ Ethereum:
 BSC:
   chain: 56
   scan: https://bscscan.com
+  rpc: https://bsc-dataseed.binance.org/
   tokens:
     - bnb:   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - eth:   0x2170ed0880ac9a755fd29b2688956bd959f933f8
@@ -53,6 +55,7 @@ BSC:
 OKChain:
   chain: 66
   scan: https://www.oklink.com/okc
+  rpc: https://exchainrpc.okex.org/
   tokens:
     - okt:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt: 0x382bb369d343125bfb2117af9c149795c6c65c50
@@ -65,6 +68,7 @@ OKChain:
 Heco:
   chain: 128
   scan: https://www.hecoinfo.com
+  rpc: https://http-mainnet.hecochain.com/
   tokens:
     - ht:   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt: 0xa71edc38d189767582c38a3145b5873052c3e47a
@@ -78,6 +82,7 @@ Heco:
 Polygon:
   chain: 137
   scan: https://polygonscan.com
+  rpc: https://polygon-rpc.com/
   tokens:
     - matic: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - weth:  0x7ceb23fd6bc0add59e62ac25578270cff1b9f619
@@ -104,6 +109,7 @@ Polygon:
 Fantom:
   chain: 250
   scan: https://ftmscan.com
+  rpc: https://rpcapi.fantom.network/
   tokens:
     - ftm:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt: 0x049d68029688eabf473097a2fc38ef61633a3c7a
@@ -121,6 +127,7 @@ Fantom:
 Arbitrum:
   chain: 42161
   scan: https://arbiscan.io
+  rpc: https://arb1.arbitrum.io/rpc
   tokens:
     - eth:   0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt:  0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9
@@ -141,6 +148,7 @@ Arbitrum:
 Avalanche:
   chain: 43114
   scan: https://snowtrace.io
+  rpc: https://api.avax.network/ext/bc/C/rpc
   tokens:
     - avax: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - usdt: 0xc7198437980c041c805a1edcba50c1ce5db95118
@@ -161,6 +169,7 @@ Avalanche:
 Goerli-Testnet:
   chain: 5
   scan: https://goerli.etherscan.io
+  rpc: https://goerli.infura.io/v3/7802434607344fdf98c7bdcf359f5b61
   tokens:
     - eth:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - wbtc: 0xBBB02DE94E1Dd1E99b43458027f31aBb2d75659B
@@ -170,6 +179,7 @@ Goerli-Testnet:
 BSC-Testnet:
   chain: 97
   scan: https://testnet.bscscan.com
+  rpc: https://data-seed-prebsc-1-s3.binance.org:8545/
   tokens:
     - bnb:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - wbtc: 0xBBB02DE94E1Dd1E99b43458027f31aBb2d75659B
@@ -179,6 +189,7 @@ BSC-Testnet:
 Polygon-Testnet:
   chain: 80001
   scan: https://mumbai.polygonscan.com
+  rpc: https://matic-mumbai.chainstacklabs.com/
   tokens:
     - matic: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     - wbtc:  0xBBB02DE94E1Dd1E99b43458027f31aBb2d75659B
