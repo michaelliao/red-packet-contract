@@ -45,11 +45,6 @@ window.BLOCKCHAINS = {
         "icon": "/static/icons/shib.svg"
       },
       {
-        "symbol": "LTC",
-        "address": "0x0abcfbfa8e3fda8b7fba18721caf7d5cf55cf5f5",
-        "icon": "/static/icons/ltc.svg"
-      },
-      {
         "symbol": "DAI",
         "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
         "icon": "/static/icons/dai.svg"
