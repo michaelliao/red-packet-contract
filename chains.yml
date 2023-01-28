@@ -32,7 +32,7 @@ Ethereum:
 
 Optimistic:
   chain: 10
-  scan: https://optimistic.etherscan.io/
+  scan: https://optimistic.etherscan.io
   rpc: https://mainnet.optimism.io/
   tokens:
     - eth:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee

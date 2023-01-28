@@ -145,7 +145,7 @@ window.BLOCKCHAINS = {
   "10": {
     "id": 10,
     "name": "Optimistic",
-    "scan": "https://optimistic.etherscan.io/",
+    "scan": "https://optimistic.etherscan.io",
     "rpc": "https://mainnet.optimism.io/",
     "testnet": false,
     "native": "ETH",
