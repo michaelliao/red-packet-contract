@@ -102,6 +102,9 @@ contract AddressPoolValidator is BaseValidator {
     }
 }
 
+/**
+ * Only the NFT-721 holder can open the red packet
+ */
 contract Nft721HolderValidator is BaseValidator {
     mapping(uint256 => address) nftAddrs;
 
@@ -125,6 +128,9 @@ contract Nft721HolderValidator is BaseValidator {
     }
 }
 
+/**
+ * Only the NFT-1155 holder can open the red packet
+ */
 contract Nft1155HolderValidator is BaseValidator {
     mapping(uint256 => address) nftAddrs;
     mapping(uint256 => uint256) nftIds;
@@ -151,6 +157,9 @@ contract Nft1155HolderValidator is BaseValidator {
     }
 }
 
+/**
+ * Only the ERC20 holder with minimum balance can open the red packet
+ */
 contract ERC20HolderValidator is BaseValidator {
     mapping(uint256 => address) ercAddrs;
     mapping(uint256 => uint256) ercHolds;
@@ -177,6 +186,9 @@ contract ERC20HolderValidator is BaseValidator {
     }
 }
 
+/**
+ * Can open the red packet after specific timestamp.
+ */
 contract TimeBasedValidator is BaseValidator {
     mapping(uint256 => uint256) timestamps;
 
