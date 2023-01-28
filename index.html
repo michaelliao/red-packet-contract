@@ -377,7 +377,7 @@
                                 }
                             }
                             loading.close();
-                            let url = location.href + 'rp.html?chain=' + chainId + '&id=' + redPacketId;
+                            let url = location.protocol + '//' + location.host + '/rp.html?chain=' + chainId + '&id=' + redPacketId;
                             showInfo('Success', '<p>Red packet created successfully!</p><p>Password: ' +
                                 password + '</p><p>You can share this red packet:</p><p><a target="_blank" href="' +
                                 url + '">' + url + ' <i class="bi bi-box-arrow-up-right"></i></a></p>');
