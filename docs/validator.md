@@ -21,11 +21,13 @@ Here is a simple validator contract:
 contract Validator is ICondition {
     mapping(address => bool) internal authorizedAddresses;
 
-    function check(address redpacketContract, uint256 redpacketId, address operator) external view returns (bool) {
+    function check(address redRacketContract, uint256 redRacketId, address operator) external view returns (bool) {
         return (
-            redpacketContract == 0xFe6667986f58F2F7ed1e7C17Cee3951d8ABb717f &&
-            redpacketId == 1234 && 
+            redRacketContract == 0xFe6667986f58F2F7ed1e7C17Cee3951d8ABb717f &&
+            redRacketId == 1234 && 
             authorizedAddresses[operator]);
     }
 }
 ```
+
+Here are [examples of validators](https://github.com/michaelliao/red-packet-contract/blob/master/contracts/Validators.sol).

@@ -4,7 +4,7 @@ JavaScript code to generate proof.
 
 ### Generate Passcode Hash for Creator
 
-Passcode is a uint256 that is hashed by creator address and string password:
+Passcode is a uint256 that is hashed by creator address (all lowercase) and string password (case-sensitive, UTF-8 encoding):
 
 ```
 // TODO: import ethersjs, snarkjs...
