@@ -6,12 +6,12 @@ The addresses of red packet on multiple chains are same: [0xFe6667986f58F2F7ed1e
 
 ### Deployed Validators
 
-Address-Pool Validator: [0xAdd00633aAc3204555b7E4eAF94F4C3015aEc0a8](https://blockscan.com/address/0xAdd00633aAc3204555b7E4eAF94F4C3015aEc0a8)
+Address-Pool Validator: [0xADD0051Cc477e65D5B4f13a1D055Aa3650dF7635](https://blockscan.com/address/0xADD0051Cc477e65D5B4f13a1D055Aa3650dF7635)
 
-ERC20-Holder Validator: [0xE20a0DA0f3cA568d41d5fEd509557f39D916F258](https://blockscan.com/address/0xE20a0DA0f3cA568d41d5fEd509557f39D916F258)
+ERC20-Holder Validator: [0xE20EDb92d70fB1793446Ed497Bc2Bf5BCb2d6590](https://blockscan.com/address/0xE20EDb92d70fB1793446Ed497Bc2Bf5BCb2d6590)
 
-NFT-721-Holder Validator: [0xE72108b0666FFC7fCa5298Fc1827c0703B1F452F](https://blockscan.com/address/0xE72108b0666FFC7fCa5298Fc1827c0703B1F452F)
+NFT-721-Holder Validator: [0xE721E34C44583Ac42D8B1dFeCb2F2B8a34730e56](https://blockscan.com/address/0xE721E34C44583Ac42D8B1dFeCb2F2B8a34730e56)
 
-NFT-1155-Holder Validator: [0xE11550f9e11a76f8731B8aaa0580C64D818d8E03](https://blockscan.com/address/0xE11550f9e11a76f8731B8aaa0580C64D818d8E03)
+NFT-1155-Holder Validator: [0xE1155A1004DA9F85A18ba97aB918c44467b35ef5](https://blockscan.com/address/0xE1155A1004DA9F85A18ba97aB918c44467b35ef5)
 
-Time Based Validator: [0xA000A28abb14B8D73E744be7CFB0faa949789B95](https://blockscan.com/address/0xA000A28abb14B8D73E744be7CFB0faa949789B95)
+Time Based Validator: [0xAf000bA2B6612613006FDc2c252Da9C69ba5e64e](https://blockscan.com/address/0xAf000bA2B6612613006FDc2c252Da9C69ba5e64e)

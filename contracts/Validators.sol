@@ -123,7 +123,9 @@ contract Nft721HolderValidator is BaseValidator {
         address operator
     ) external view checkContract(redPacketContract) returns (bool) {
         address nftAddr = nftAddrs[redPacketId];
-        require(nftAddr != address(0), "nft address not set");
+        if (nftAddr == address(0)) {
+            return false;
+        }
         return IERC721(nftAddr).balanceOf(operator) > 0;
     }
 }
@@ -152,7 +154,9 @@ contract Nft1155HolderValidator is BaseValidator {
         address operator
     ) external view checkContract(redPacketContract) returns (bool) {
         address nftAddr = nftAddrs[redPacketId];
-        require(nftAddr != address(0), "nft address not set");
+        if (nftAddr == address(0)) {
+            return false;
+        }
         return IERC1155(nftAddr).balanceOf(operator, nftIds[redPacketId]) > 0;
     }
 }
@@ -181,7 +185,9 @@ contract ERC20HolderValidator is BaseValidator {
         address operator
     ) external view checkContract(redPacketContract) returns (bool) {
         address erc = ercAddrs[redPacketId];
-        require(erc != address(0), "erc address not set");
+        if (erc == address(0)) {
+            return false;
+        }
         return IERC20(erc).balanceOf(operator) >= ercHolds[redPacketId];
     }
 }
@@ -207,7 +213,9 @@ contract TimeBasedValidator is BaseValidator {
         address operator
     ) external view checkContract(redPacketContract) returns (bool) {
         uint256 timestamp = timestamps[redPacketId];
-        require(timestamp > 0, "timestamp not set");
+        if (timestamp == 0) {
+            return false;
+        }
         return block.timestamp >= timestamp;
     }
 }
