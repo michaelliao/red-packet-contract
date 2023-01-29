@@ -1077,6 +1077,11 @@
                             </div>
                         </div>
                     </div>
+                    <div v-show="redPacket.condition!=='0x0000000000000000000000000000000000000000'"
+                        class="mt-4 mb-4 text-center text-white">
+                        <span class="text-white">* This red packet has address
+                            validation logic.</span>
+                    </div>
                     <div v-show="canCustomize" class="mt-4 mb-4 text-center text-white">
                         <a v-bind:href="customizeUrl" target="_blank" class="text-white">Customize Your Red Packet</a>
                     </div>
