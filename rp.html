@@ -718,13 +718,21 @@
                         if (!this.ready) {
                             return showAlert('Error', 'Please connect MetaMask to ' + this.correctNetworkName + ' first!');
                         }
-                        // check password:
                         let
                             payload = this.redPacket.creator.toLowerCase() + password,
                             passcode = ethers.BigNumber.from(keccak(payload)),
                             account = this.account.toLowerCase(),
                             accountBN = ethers.BigNumber.from(account),
                             secretBN = passcode.sub(accountBN);
+                        // check validator:
+                        if (this.redPacket.condition !== window.ZERO_ADDRESS) {
+                            let validator = new ethers.Contract(this.redPacket.condition, this.redPacket.conditionABI, getWeb3Provider().getSigner());
+                            let r = await validator.check(this.redPacket.redPacketAddress, this.redPacket.id, account);
+                            if (!r) {
+                                return showAlert('Error', 'You cannot open this red packet by address ' + this.redPacket.abbrAddress(account));
+                            }
+                        }
+                        // check password:
                         console.log('passcode hash stored in contract:', this.redPacket.passcodeHash.toHexString());
                         console.log('passcode from user input = ' + passcode.toHexString());
                         console.log('secret = ' + secretBN.toHexString());
