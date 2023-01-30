@@ -738,7 +738,7 @@ window.BLOCKCHAINS = {
       {
         "symbol": "CFX",
         "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-        "icon": "/static/icons/default.svg"
+        "icon": "/static/icons/cfx.svg"
       },
       {
         "symbol": "USDT",
