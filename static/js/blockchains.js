@@ -727,6 +727,46 @@ window.BLOCKCHAINS = {
       }
     ]
   },
+  "1030": {
+    "id": 1030,
+    "name": "Conflux-eSpace",
+    "scan": "https://evm.confluxscan.net",
+    "rpc": "https://evm.confluxrpc.com",
+    "testnet": false,
+    "native": "CFX",
+    "tokens": [
+      {
+        "symbol": "CFX",
+        "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "icon": "/static/icons/default.svg"
+      },
+      {
+        "symbol": "USDT",
+        "address": "0xfe97e85d13abd9c1c33384e796f10b73905637ce",
+        "icon": "/static/icons/usdt.svg"
+      },
+      {
+        "symbol": "USDC",
+        "address": "0x6963efed0ab40f6c3d7bda44a05dcf1437c44372",
+        "icon": "/static/icons/usdc.svg"
+      },
+      {
+        "symbol": "ETH",
+        "address": "0xa47f43de2f9623acb395ca4905746496d2014d57",
+        "icon": "/static/icons/eth.svg"
+      },
+      {
+        "symbol": "WBTC",
+        "address": "0x1f545487c62e5acfea45dcadd9c627361d1616d8",
+        "icon": "/static/icons/wbtc.svg"
+      },
+      {
+        "symbol": "BNB",
+        "address": "0x94bd7a37d2ce24cc597e158facaa8d601083ffec",
+        "icon": "/static/icons/bnb.svg"
+      }
+    ]
+  },
   "5": {
     "id": 5,
     "name": "Goerli-Testnet",

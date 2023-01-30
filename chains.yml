@@ -179,6 +179,18 @@ Avalanche:
     - crv:  0x249848beca43ac405b8102ec90dd5f22ca513c06
     - comp: 0xc3048e19e76cb9a3aa9d77d8c03c29fc906e2437
 
+Conflux-eSpace:
+  chain: 1030
+  scan: https://evm.confluxscan.net
+  rpc: https://evm.confluxrpc.com
+  tokens:
+    - cfx:  0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    - usdt: 0xfe97e85d13abd9c1c33384e796f10b73905637ce
+    - usdc: 0x6963efed0ab40f6c3d7bda44a05dcf1437c44372
+    - eth:  0xa47f43de2f9623acb395ca4905746496d2014d57
+    - wbtc: 0x1f545487c62e5acfea45dcadd9c627361d1616d8
+    - bnb:  0x94bd7a37d2ce24cc597e158facaa8d601083ffec
+
 # testnet:
 
 Goerli-Testnet:
