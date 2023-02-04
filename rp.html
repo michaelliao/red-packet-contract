@@ -596,9 +596,6 @@
                         }
                         return false;
                     },
-                    customizeUrl: function () {
-                        return location.pathname + '?chain=' + this.redPacket.chain + '&id=' + this.redPacket.id + '&preview=true';
-                    },
                     invalid: function () {
                         return isNaN(this.redPacket.chain) || isNaN(this.redPacket.id);
                     },
@@ -824,6 +821,18 @@
                         } else {
                             console.error('Invalid chain id: ', this.chainId);
                         }
+                    },
+                    gotoCustomizeUrl: function () {
+                        let
+                            params = this.redPacket.getRpParams(),
+                            urlSearch = new URLSearchParams();
+                        urlSearch.append('chain', this.redPacket.chain);
+                        urlSearch.append('id', this.redPacket.id);
+                        urlSearch.append('preview', 'true');
+                        for (let k in params) {
+                            urlSearch.append(k, params[k]);
+                        }
+                        location.assign('rp.html?' + urlSearch.toString());
                     },
                     accountChanged: function (accounts) {
                         console.log('wallet account changed:', accounts.length === 0 ? null : accounts[0]);
@@ -1105,7 +1114,8 @@
                             validation logic.</span>
                     </div>
                     <div v-show="canCustomize && !redPacket.preview" class="mt-4 mb-4 text-center text-white">
-                        <a v-bind:href="customizeUrl" target="_blank" class="text-white">Customize Your Red Packet</a>
+                        <a href="#0" v-on:click="gotoCustomizeUrl" target=" _blank" class="text-white">Customize Your
+                            Red Packet</a>
                     </div>
                     <div id="customize" style="display:none">
                         <div class="card mt-4" style="width:328px; margin-left: auto; margin-right: auto;">
@@ -1142,8 +1152,8 @@
                                     </div>
                                     <div class="mb-3 form-check">
                                         <label class="form-check-label">
-                                            <input name="rpDisplayOpenInfo" type="checkbox" checked
-                                                class="form-check-input" value="false">
+                                            <input name="rpDisplayOpenInfo" type="checkbox" class="form-check-input"
+                                                value="false">
                                             Do Not Display Open Info</label>
                                     </div>
                                     <button type="submit" class="btn btn-outline-primary">Preview</button>
