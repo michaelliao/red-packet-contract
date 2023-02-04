@@ -871,6 +871,28 @@
                     $('#vm').show();
                     await this.connectWallet();
                     await this.loadRedPacket();
+                    if (this.redPacket.preview) {
+                        // show customize:
+                        let
+                            $customize = $('#customize'),
+                            $chain = $customize.find('input[name=chain]'),
+                            $id = $customize.find('input[name=id]'),
+                            $rpGreeting = $customize.find('input[name=rpGreeting]'),
+                            $rpCreator = $customize.find('input[name=rpCreator]'),
+                            $rpCoverImage = $customize.find('input[name=rpCoverImage]'),
+                            $rpOpenImage = $customize.find('input[name=rpOpenImage]'),
+                            $rpIconImage = $customize.find('input[name=rpIconImage]'),
+                            $rpDisplayOpenInfo = $customize.find('input[name=rpDisplayOpenInfo]');
+                        $chain.val(this.redPacket.chain);
+                        $id.val(this.redPacket.id);
+                        $rpGreeting.val(this.redPacket.getRpGreeting());
+                        $rpCreator.val(this.redPacket.getRpCreator(this.redPacket.creator));
+                        $rpCoverImage.val(this.redPacket.getRpCoverImage());
+                        $rpOpenImage.val(this.redPacket.getRpOpenImage());
+                        $rpIconImage.val(this.redPacket.getRpIconImage());
+                        $rpDisplayOpenInfo.prop('checked', !this.redPacket.getRpDisplayOpenInfo());
+                        $('#customize').show();
+                    }
                 }
             });
         }
@@ -1082,8 +1104,52 @@
                         <span class="text-white">* This red packet has address
                             validation logic.</span>
                     </div>
-                    <div v-show="canCustomize" class="mt-4 mb-4 text-center text-white">
+                    <div v-show="canCustomize && !redPacket.preview" class="mt-4 mb-4 text-center text-white">
                         <a v-bind:href="customizeUrl" target="_blank" class="text-white">Customize Your Red Packet</a>
+                    </div>
+                    <div id="customize" style="display:none">
+                        <div class="card mt-4" style="width:328px; margin-left: auto; margin-right: auto;">
+                            <div class="card-body">
+                                <h5 class="card-title">Customize Red Packet</h5>
+                                <form method="get" action="rp.html">
+                                    <input name="chain" type="hidden" value="">
+                                    <input name="id" type="hidden" value="">
+                                    <input name="preview" type="hidden" value="true">
+                                    <div class="mb-3">
+                                        <label class="form-label">Greeting:</label>
+                                        <input name="rpGreeting" class="form-control form-control-sm" maxlength="50"
+                                            placeholder="Best Wishes!">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Creator Name:</label>
+                                        <input name="rpCreator" class="form-control form-control-sm" maxlength="50"
+                                            placeholder="0x">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Cover Image:</label>
+                                        <input name="rpCoverImage" class="form-control form-control-sm" maxlength="1000"
+                                            placeholder="https://example.com/path/to/image.png">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Open Image:</label>
+                                        <input name="rpOpenImage" class="form-control form-control-sm" maxlength="1000"
+                                            placeholder="https://example.com/path/to/image.png">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Token Image:</label>
+                                        <input name="rpIconImage" class="form-control form-control-sm" maxlength="1000"
+                                            placeholder="https://example.com/path/to/image.png">
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <label class="form-check-label">
+                                            <input name="rpDisplayOpenInfo" type="checkbox" checked
+                                                class="form-check-input" value="false">
+                                            Do Not Display Open Info</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-primary">Preview</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
