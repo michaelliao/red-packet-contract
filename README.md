@@ -15,3 +15,7 @@ Please note the red packet contract address starts with `Fe666` (stands for 老�
 ### Documents
 
 [Documents](https://github.com/michaelliao/red-packet-contract/tree/master/docs)
+
+### Reference
+
+[创建零知识证明的加密红包](https://www.liaoxuefeng.com/article/1526960310190114)
