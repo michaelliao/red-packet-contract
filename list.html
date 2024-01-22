@@ -259,7 +259,7 @@
                             let query = {
                                 query:
                                     `{
-  creates(first: 20) {
+  creates(first: 20, orderBy: redPacketId, orderDirection: desc) {
     id
     redPacketId
     creator
